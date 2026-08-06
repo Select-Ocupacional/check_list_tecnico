@@ -30,7 +30,7 @@
       <li class="passos__item" data-passo="setores">
         <span class="passos__num">2</span> Setores
       </li>
-      <li class="passos__item passos__item--futuro" aria-disabled="true">
+      <li class="passos__item" data-passo="riscos">
         <span class="passos__num">3</span> Riscos e EPIs
       </li>
       <li class="passos__item passos__item--futuro" aria-disabled="true">
@@ -192,6 +192,78 @@
 
       <ul id="lista-setores" class="lista-setores" aria-live="polite"></ul>
       <p id="setores-vazio" class="lista-vazia">Nenhum setor cadastrado ainda.</p>
+    </section>
+
+    <!-- ============ TELA 3 — RISCOS OCUPACIONAIS E EPI/EPC ============ -->
+    <section id="tela-riscos" class="tela" aria-labelledby="titulo-riscos" hidden>
+      <h2 id="titulo-riscos" class="tela__titulo">Riscos ocupacionais e EPIs/EPCs</h2>
+      <p class="tela__ajuda">Selecione o setor e registre os riscos encontrados e a verificação de EPIs/EPCs. Os dados são salvos por setor.</p>
+
+      <div class="campo setor-seletor">
+        <label for="setor_ativo">Setor em avaliação</label>
+        <select id="setor_ativo" aria-describedby="setor_ativo_ajuda"></select>
+        <small id="setor_ativo_ajuda" class="nota-norma">Troque o setor para avaliar cada ambiente percorrido.</small>
+      </div>
+
+      <!-- Riscos: grupos e agentes gerados dinamicamente (catalogo-riscos.js) -->
+      <h3 class="subtitulo">Riscos ocupacionais</h3>
+      <p class="tela__ajuda">Ative os agentes de risco identificados no setor. Ao ativar, informe a conformidade dos controles.</p>
+      <div id="riscos-container" aria-live="polite"></div>
+
+      <!-- EPI / EPC -->
+      <h3 class="subtitulo">EPIs e EPCs</h3>
+      <form id="form-novo-epi" class="epi-form" novalidate>
+        <div class="campo-linha">
+          <div class="campo campo--pequeno">
+            <label for="epi_tipo">Tipo *</label>
+            <select id="epi_tipo" name="epi_tipo">
+              <option value="epi">EPI (individual)</option>
+              <option value="epc">EPC (coletivo)</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="epi_descricao">Descrição *</label>
+            <input type="text" id="epi_descricao" name="epi_descricao"
+                   placeholder="Ex.: Protetor auricular tipo concha" autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="campo" id="campo-ca">
+          <label for="epi_ca">Número do CA * <span class="rotulo-hint">(obrigatório para EPI)</span></label>
+          <input type="text" id="epi_ca" name="epi_ca" inputmode="numeric"
+                 placeholder="Ex.: 12345" autocomplete="off" />
+        </div>
+
+        <div class="campo">
+          <span class="rotulo-grupo">A empresa fornece?</span>
+          <div class="segmentado" id="epi_fornecido" role="group" aria-label="A empresa fornece o EPI/EPC?">
+            <button type="button" data-val="true">Sim</button>
+            <button type="button" data-val="false">Não</button>
+          </div>
+        </div>
+
+        <div class="campo">
+          <span class="rotulo-grupo">Uso correto pelos colaboradores?</span>
+          <div class="segmentado" id="epi_em_uso" role="group" aria-label="Uso correto pelos colaboradores?">
+            <button type="button" data-val="true">Sim</button>
+            <button type="button" data-val="false">Não</button>
+          </div>
+        </div>
+
+        <div class="campo">
+          <span class="rotulo-grupo">Condições de conservação</span>
+          <div class="segmentado" id="epi_conservacao" role="group" aria-label="Condições de conservação">
+            <button type="button" data-val="bom">Adequado</button>
+            <button type="button" data-val="ruim">Inadequado</button>
+          </div>
+        </div>
+
+        <small class="campo__erro" data-erro="epi_form"></small>
+        <button type="submit" class="btn btn--secundario btn--bloco">+ Adicionar EPI/EPC</button>
+      </form>
+
+      <ul id="lista-epi" class="lista-setores" aria-live="polite"></ul>
+      <p id="epi-vazio" class="lista-vazia">Nenhum EPI/EPC registrado neste setor.</p>
     </section>
   </main>
 

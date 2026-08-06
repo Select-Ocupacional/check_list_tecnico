@@ -210,6 +210,121 @@ input.invalido, select.invalido, textarea.invalido {
 .setor-card__remover:hover { background: var(--erro-fundo); border-color: var(--erro); }
 .lista-vazia { color: var(--cinza-medio); font-size: 0.9rem; text-align: center; padding: 18px; }
 
+/* --------- Tela 3: subtítulos e seletor de setor --------- */
+.subtitulo {
+  font-size: 1rem;
+  margin: 22px 0 6px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--teal);
+  color: var(--navy);
+}
+.setor-seletor {
+  background: var(--branco);
+  border: 1px solid var(--cinza-borda);
+  border-radius: var(--raio);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+.rotulo-grupo {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.rotulo-hint { font-weight: 400; color: var(--cinza-medio); font-size: 0.8rem; }
+
+/* --------- Toggle switch --------- */
+.switch { position: relative; display: inline-block; width: 52px; height: 30px; flex: 0 0 auto; }
+.switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.switch__trilho {
+  position: absolute; inset: 0;
+  background: var(--cinza-borda);
+  border-radius: 999px;
+  transition: background-color 0.15s ease;
+}
+.switch__trilho::before {
+  content: "";
+  position: absolute; left: 3px; top: 3px;
+  width: 24px; height: 24px;
+  background: var(--branco);
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+  transition: transform 0.15s ease;
+}
+.switch input:checked + .switch__trilho { background: var(--teal); }
+.switch input:checked + .switch__trilho::before { transform: translateX(22px); }
+.switch input:focus-visible + .switch__trilho { box-shadow: 0 0 0 3px rgba(27,168,157,0.30); }
+
+/* --------- Controle segmentado --------- */
+.segmentado {
+  display: flex;
+  border: 1px solid var(--cinza-borda);
+  border-radius: var(--raio);
+  overflow: hidden;
+}
+.segmentado button {
+  flex: 1;
+  min-height: 44px;
+  padding: 0 8px;
+  background: var(--branco);
+  border: 0;
+  border-right: 1px solid var(--cinza-borda);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--navy);
+  cursor: pointer;
+}
+.segmentado button:last-child { border-right: 0; }
+.segmentado button[aria-pressed="true"] { background: var(--teal); color: var(--branco); }
+.segmentado button:hover:not([aria-pressed="true"]) { background: var(--cinza-claro); }
+
+/* --------- Grupos de risco --------- */
+.risco-grupo {
+  background: var(--branco);
+  border: 1px solid var(--cinza-borda);
+  border-radius: var(--raio);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.risco-grupo__cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-left: 5px solid var(--teal);
+  background: var(--cinza-claro);
+}
+.risco-grupo[data-grupo="fisico"]     .risco-grupo__cabecalho { border-left-color: #2E6BE6; }
+.risco-grupo[data-grupo="quimico"]    .risco-grupo__cabecalho { border-left-color: #E67E22; }
+.risco-grupo[data-grupo="biologico"]  .risco-grupo__cabecalho { border-left-color: #27AE60; }
+.risco-grupo[data-grupo="ergonomico"] .risco-grupo__cabecalho { border-left-color: #8E44AD; }
+.risco-grupo[data-grupo="acidente"]   .risco-grupo__cabecalho { border-left-color: #C0392B; }
+.risco-grupo__titulo { font-size: 0.95rem; font-weight: 600; margin: 0; }
+.risco-grupo__contagem { margin-left: auto; font-size: 0.78rem; color: var(--cinza-medio); }
+
+.risco-lista { list-style: none; margin: 0; padding: 0; }
+.risco-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-top: 1px solid var(--cinza-claro);
+}
+.risco-item__nome { flex: 1; font-size: 0.95rem; overflow-wrap: anywhere; }
+.risco-item--detalhe { display: block; padding: 0; }
+.risco-detalhe {
+  display: grid;
+  gap: 12px;
+  padding: 12px 14px 14px;
+  background: rgba(27,168,157,0.06);
+  border-top: 1px dashed var(--teal);
+}
+.risco-detalhe .campo { margin-bottom: 0; }
+
+/* --------- Cartão de EPI/EPC em alerta --------- */
+.setor-card--alerta { border-left-color: var(--erro); }
+
 /* --------- Botões --------- */
 .btn {
   font-family: inherit;

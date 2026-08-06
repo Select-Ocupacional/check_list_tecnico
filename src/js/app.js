@@ -14,11 +14,15 @@ import {
   validarSetoresTela,
   renderizarLista,
 } from "./tela-setores.js";
+import {
+  inicializarTelaRiscos,
+  renderizarTelaRiscos,
+} from "./tela-riscos.js";
 
 const $ = (sel) => document.querySelector(sel);
 
 // Ordem das telas navegáveis nesta versão.
-const PASSOS = ["identificacao", "setores"];
+const PASSOS = ["identificacao", "setores", "riscos"];
 let indiceAtual = 0;
 
 const btnAvancar = $("#btn-avancar");
@@ -32,6 +36,7 @@ function irPara(indice) {
   // Alterna visibilidade das seções.
   $("#tela-identificacao").hidden = passo !== "identificacao";
   $("#tela-setores").hidden = passo !== "setores";
+  $("#tela-riscos").hidden = passo !== "riscos";
 
   // Atualiza indicador de passos.
   document.querySelectorAll(".passos__item").forEach((item) => {
@@ -49,6 +54,7 @@ function irPara(indice) {
   btnAvancar.textContent = indiceAtual === PASSOS.length - 1 ? "Concluir etapa" : "Avançar";
 
   if (passo === "setores") renderizarLista();
+  if (passo === "riscos") renderizarTelaRiscos();
   document.querySelector(".conteudo")?.scrollTo({ top: 0, behavior: "smooth" });
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -66,6 +72,7 @@ function inicializar() {
 
   inicializarTelaIdentificacao();
   inicializarTelaSetores();
+  inicializarTelaRiscos();
 
   btnAvancar.addEventListener("click", () => {
     const passoAtual = PASSOS[indiceAtual];
@@ -74,8 +81,8 @@ function inicializar() {
     if (indiceAtual < PASSOS.length - 1) {
       irPara(indiceAtual + 1);
     } else {
-      // Fim das telas desta issue (SST-02). Próximas telas em issues futuras.
-      alert("Etapas 1 e 2 concluídas e salvas em rascunho.\nPróximas telas (Riscos/EPIs e Encerramento) serão implementadas nas próximas issues.");
+      // Fim das telas implementadas (SST-03). Tela 4 (Encerramento) em issue futura.
+      alert("Etapas 1 a 3 concluídas e salvas em rascunho.\nA Tela 4 (Encerramento: não-conformidades, evidências e assinaturas) será implementada na próxima issue.");
     }
   });
 

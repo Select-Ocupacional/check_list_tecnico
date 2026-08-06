@@ -105,3 +105,88 @@ export function removerSetor(id) {
   estado.visita.setores = estado.visita.setores.filter((s) => s.id !== id);
   salvar();
 }
+
+/** Retorna o setor pelo id (ou undefined). */
+export function obterSetor(setorId) {
+  return estado.visita.setores.find((s) => s.id === setorId);
+}
+
+/* ---------- Riscos ocupacionais (por setor) ---------- */
+
+/**
+ * Marca/desmarca a presença de um risco no setor. Identidade = grupo + agente.
+ * Ao marcar, cria uma AvaliacaoRisco no formato do schema; ao desmarcar, remove.
+ * @returns {object|null} a avaliação criada, ou null ao remover.
+ */
+export function definirRiscoPresente(setorId, grupo, agente, presente) {
+  const setor = obterSetor(setorId);
+  if (!setor) return null;
+  const idx = setor.avaliacoes_risco.findIndex(
+    (r) => r.grupo === grupo && r.agente === agente
+  );
+
+  if (presente) {
+    if (idx >= 0) return setor.avaliacoes_risco[idx];
+    const risco = {
+      id: gerarUuid(),
+      grupo,
+      agente,
+      presente: true,
+      nivel_exposicao: "nao_avaliado",
+      // Neutro por padrão (controles adequados); técnico ajusta se necessário.
+      conforme: "conforme",
+      observacao: "",
+    };
+    setor.avaliacoes_risco.push(risco);
+    salvar();
+    return risco;
+  }
+
+  if (idx >= 0) {
+    setor.avaliacoes_risco.splice(idx, 1);
+    salvar();
+  }
+  return null;
+}
+
+/** Aplica alterações a uma AvaliacaoRisco existente e persiste. */
+export function atualizarRisco(setorId, riscoId, patch) {
+  const setor = obterSetor(setorId);
+  const risco = setor?.avaliacoes_risco.find((r) => r.id === riscoId);
+  if (!risco) return null;
+  Object.assign(risco, patch);
+  salvar();
+  return risco;
+}
+
+/* ---------- EPI / EPC (por setor) ---------- */
+
+/** Adiciona uma VerificacaoEpiEpc ao setor e persiste. */
+export function adicionarEpiEpc(setorId, dados) {
+  const setor = obterSetor(setorId);
+  if (!setor) return null;
+  const item = {
+    id: gerarUuid(),
+    tipo: dados.tipo,
+    descricao: (dados.descricao || "").trim(),
+    fornecido: dados.fornecido,
+    em_uso: dados.em_uso,
+    estado_conservacao: dados.estado_conservacao,
+    conforme: dados.conforme,
+    observacao: (dados.observacao || "").trim(),
+  };
+  // numero_ca é obrigatório apenas para EPI (regra do schema).
+  if (dados.tipo === "epi" && dados.numero_ca) item.numero_ca = dados.numero_ca.trim();
+  if (!item.observacao) delete item.observacao;
+  setor.verificacoes_epi_epc.push(item);
+  salvar();
+  return item;
+}
+
+/** Remove uma VerificacaoEpiEpc do setor e persiste. */
+export function removerEpiEpc(setorId, itemId) {
+  const setor = obterSetor(setorId);
+  if (!setor) return;
+  setor.verificacoes_epi_epc = setor.verificacoes_epi_epc.filter((i) => i.id !== itemId);
+  salvar();
+}
