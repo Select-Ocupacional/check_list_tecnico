@@ -4,7 +4,7 @@
    ========================================================= */
 
 import { estado, salvar } from "./estado.js";
-import { validarIdentificacao, formatarCnpj, apenasDigitos } from "./validacao.js";
+import { validarIdentificacao, formatarCnpj, formatarCep, apenasDigitos } from "./validacao.js";
 
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
 
@@ -24,6 +24,7 @@ function preencherFormulario() {
   set("logradouro", v.unidade.endereco.logradouro);
   set("numero", v.unidade.endereco.numero);
   set("bairro", v.unidade.endereco.bairro);
+  set("cep", v.unidade.endereco.cep ? formatarCep(v.unidade.endereco.cep) : "");
   set("municipio", v.unidade.endereco.municipio);
   set("uf", v.unidade.endereco.uf);
   set("grau_risco", v.unidade.grau_risco ?? "");
@@ -51,6 +52,7 @@ function coletarFormulario() {
   v.unidade.endereco.logradouro = val("logradouro");
   v.unidade.endereco.numero = val("numero");
   v.unidade.endereco.bairro = val("bairro");
+  v.unidade.endereco.cep = apenasDigitos(val("cep")); // schema exige 8 dígitos; vazio é sanitizado
   v.unidade.endereco.municipio = val("municipio");
   v.unidade.endereco.uf = val("uf").toUpperCase();
 
@@ -113,6 +115,10 @@ export function inicializarTelaIdentificacao() {
   // UF sempre em maiúsculas.
   const uf = $("#uf");
   uf?.addEventListener("input", () => { uf.value = uf.value.toUpperCase(); });
+
+  // Máscara viva de CEP.
+  const cep = $("#cep");
+  cep?.addEventListener("input", () => { cep.value = formatarCep(cep.value); });
 
   // Autosave em rascunho a cada alteração (offline-first).
   form?.addEventListener("input", () => { coletarFormulario(); salvar(); });

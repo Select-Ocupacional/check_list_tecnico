@@ -325,6 +325,52 @@ input.invalido, select.invalido, textarea.invalido {
 /* --------- Cartão de EPI/EPC em alerta --------- */
 .setor-card--alerta { border-left-color: var(--erro); }
 
+/* --------- Tela 4: assinatura em canvas --------- */
+.assinatura__ajuda { font-size: 0.85rem; color: var(--cinza-medio); margin: 0 0 8px; }
+.assinatura {
+  position: relative;
+  background: var(--branco);
+  border: 1px solid var(--cinza-borda);
+  border-radius: var(--raio);
+  margin-bottom: 10px;
+}
+.assinatura__canvas {
+  display: block;
+  width: 100%;
+  height: 180px;
+  border-radius: var(--raio);
+  cursor: crosshair;
+  touch-action: none;        /* impede rolagem enquanto assina no celular */
+}
+.assinatura__linha {
+  position: absolute;
+  left: 16px; right: 16px; bottom: 34px;
+  border-bottom: 1px dashed var(--cinza-medio);
+  pointer-events: none;
+}
+
+/* --------- Tela 4: painel de sucesso --------- */
+.sucesso {
+  background: var(--branco);
+  border: 1px solid var(--teal);
+  border-radius: var(--raio);
+  padding: 24px 18px;
+  text-align: center;
+}
+.sucesso__icone {
+  width: 56px; height: 56px;
+  margin: 0 auto 12px;
+  display: grid; place-items: center;
+  background: var(--teal);
+  color: var(--branco);
+  border-radius: 50%;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+.sucesso__titulo { margin: 0 0 8px; color: var(--navy); }
+.sucesso__resumo { color: var(--cinza-medio); font-size: 0.92rem; margin: 0 0 18px; }
+.sucesso__acoes { display: grid; gap: 10px; }
+
 /* --------- Botões --------- */
 .btn {
   font-family: inherit;

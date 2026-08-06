@@ -190,3 +190,58 @@ export function removerEpiEpc(setorId, itemId) {
   setor.verificacoes_epi_epc = setor.verificacoes_epi_epc.filter((i) => i.id !== itemId);
   salvar();
 }
+
+/* ---------- Encerramento e sanitização ---------- */
+
+// Chaves cujo valor null é permitido pelo schema (não devem ser removidas).
+const NULOS_PERMITIDOS = new Set(["sincronizado_em"]);
+
+/**
+ * Remove recursivamente campos opcionais "vazios" de um objeto:
+ * strings vazias ("") e valores null (exceto os permitidos, ex.: sincronizado_em).
+ * Corrige o caso do CEP em branco e similares (numero, bairro, grau_risco,
+ * numero_trabalhadores, observacao...) que quebrariam padrões/enums do schema.
+ */
+function limparVazios(obj) {
+  if (Array.isArray(obj)) {
+    obj.forEach(limparVazios);
+    return;
+  }
+  if (obj && typeof obj === "object") {
+    for (const chave of Object.keys(obj)) {
+      const valor = obj[chave];
+      if (valor === "" || (valor === null && !NULOS_PERMITIDOS.has(chave))) {
+        delete obj[chave];
+      } else if (valor && typeof valor === "object") {
+        limparVazios(valor);
+      }
+    }
+  }
+}
+
+/**
+ * Retorna uma cópia da visita pronta para validação contra o schema:
+ * clonada (não muta o estado) e sem campos opcionais vazios.
+ * @param {object} [visita] visita a preparar (padrão: a visita atual).
+ */
+export function prepararParaValidacao(visita = estado.visita) {
+  const clone = typeof structuredClone === "function"
+    ? structuredClone(visita)
+    : JSON.parse(JSON.stringify(visita));
+  limparVazios(clone);
+  return clone;
+}
+
+/**
+ * Registra o encerramento da visita: parecer, hora de fim e assinaturas,
+ * marcando o status como "concluida". Persiste ao final.
+ */
+export function registrarEncerramento({ hora_fim, parecer, assinaturas }) {
+  const v = estado.visita;
+  if (hora_fim) v.hora_fim = hora_fim;
+  v.observacoes_gerais = parecer || "";
+  v.assinaturas = assinaturas;
+  v.status = "concluida";
+  salvar();
+  return v;
+}

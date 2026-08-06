@@ -33,7 +33,7 @@
       <li class="passos__item" data-passo="riscos">
         <span class="passos__num">3</span> Riscos e EPIs
       </li>
-      <li class="passos__item passos__item--futuro" aria-disabled="true">
+      <li class="passos__item" data-passo="encerramento">
         <span class="passos__num">4</span> Encerramento
       </li>
     </ol>
@@ -117,6 +117,14 @@
               <label for="bairro">Bairro</label>
               <input type="text" id="bairro" name="bairro" autocomplete="off" />
             </div>
+            <div class="campo campo--pequeno">
+              <label for="cep">CEP</label>
+              <input type="text" id="cep" name="cep" inputmode="numeric"
+                     maxlength="9" placeholder="00000-000" autocomplete="off" />
+              <small class="campo__erro" data-erro="cep"></small>
+            </div>
+          </div>
+          <div class="campo-linha">
             <div class="campo">
               <label for="municipio">Município *</label>
               <input type="text" id="municipio" name="municipio" autocomplete="off" required />
@@ -264,6 +272,84 @@
 
       <ul id="lista-epi" class="lista-setores" aria-live="polite"></ul>
       <p id="epi-vazio" class="lista-vazia">Nenhum EPI/EPC registrado neste setor.</p>
+    </section>
+
+    <!-- ============ TELA 4 — ENCERRAMENTO E ASSINATURAS ============ -->
+    <section id="tela-encerramento" class="tela" aria-labelledby="titulo-encerramento" hidden>
+      <h2 id="titulo-encerramento" class="tela__titulo">Encerramento da visita</h2>
+      <p class="tela__ajuda">Registre o parecer técnico, os dados do responsável e colete as assinaturas para concluir.</p>
+
+      <form id="form-encerramento" novalidate>
+        <fieldset class="grupo">
+          <legend class="grupo__legenda">Parecer técnico</legend>
+          <div class="campo">
+            <label for="parecer">Parecer / conclusão da vistoria *</label>
+            <textarea id="parecer" name="parecer" rows="5"
+                      placeholder="Resumo das condições encontradas, principais riscos e recomendações."></textarea>
+            <small class="campo__erro" data-erro="parecer"></small>
+          </div>
+          <div class="campo campo--pequeno">
+            <label for="hora_fim">Hora de término</label>
+            <input type="time" id="hora_fim" name="hora_fim" />
+          </div>
+        </fieldset>
+
+        <fieldset class="grupo">
+          <legend class="grupo__legenda">Responsável da empresa</legend>
+          <div class="campo">
+            <label for="responsavel_nome">Nome do responsável *</label>
+            <input type="text" id="responsavel_nome" name="responsavel_nome" autocomplete="off" />
+            <small class="campo__erro" data-erro="responsavel_nome"></small>
+          </div>
+          <div class="campo-linha">
+            <div class="campo">
+              <label for="responsavel_cargo">Cargo</label>
+              <input type="text" id="responsavel_cargo" name="responsavel_cargo" autocomplete="off" />
+            </div>
+            <div class="campo">
+              <label for="responsavel_doc">CPF <span class="rotulo-hint">(dado sensível)</span></label>
+              <input type="text" id="responsavel_doc" name="responsavel_doc" inputmode="numeric"
+                     maxlength="14" placeholder="000.000.000-00" autocomplete="off" />
+              <small class="campo__erro" data-erro="responsavel_doc"></small>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="grupo">
+          <legend class="grupo__legenda">Assinatura do responsável</legend>
+          <p class="assinatura__ajuda">Assine no quadro abaixo com o dedo (ou o mouse).</p>
+          <div class="assinatura">
+            <canvas id="assinatura-responsavel" class="assinatura__canvas" aria-label="Área de assinatura do responsável"></canvas>
+            <div class="assinatura__linha"></div>
+          </div>
+          <button type="button" class="btn btn--fantasma btn--bloco" data-limpar="assinatura-responsavel">Limpar assinatura</button>
+          <small class="campo__erro" data-erro="assinatura_responsavel"></small>
+        </fieldset>
+
+        <fieldset class="grupo">
+          <legend class="grupo__legenda">Assinatura do técnico</legend>
+          <p class="assinatura__ajuda">Técnico responsável: <strong id="rotulo-tecnico">—</strong></p>
+          <div class="assinatura">
+            <canvas id="assinatura-tecnico" class="assinatura__canvas" aria-label="Área de assinatura do técnico"></canvas>
+            <div class="assinatura__linha"></div>
+          </div>
+          <button type="button" class="btn btn--fantasma btn--bloco" data-limpar="assinatura-tecnico">Limpar assinatura</button>
+          <small class="campo__erro" data-erro="assinatura_tecnico"></small>
+        </fieldset>
+
+        <p class="nota-norma">CPF e assinaturas são <em>[CONFIDENCIAL]</em> (LGPD) — mantidos apenas neste dispositivo até a sincronização.</p>
+      </form>
+
+      <!-- Painel de sucesso pós-finalização -->
+      <div id="encerramento-sucesso" class="sucesso" hidden>
+        <div class="sucesso__icone" aria-hidden="true">✓</div>
+        <h3 class="sucesso__titulo">Visita concluída</h3>
+        <p id="sucesso-resumo" class="sucesso__resumo"></p>
+        <div class="sucesso__acoes">
+          <button type="button" id="btn-baixar-json" class="btn btn--secundario btn--bloco">Baixar JSON da visita</button>
+          <button type="button" id="btn-nova-visita" class="btn btn--primario btn--bloco">Iniciar nova visita</button>
+        </div>
+      </div>
     </section>
   </main>
 

@@ -18,11 +18,16 @@ import {
   inicializarTelaRiscos,
   renderizarTelaRiscos,
 } from "./tela-riscos.js";
+import {
+  inicializarTelaEncerramento,
+  renderizarTelaEncerramento,
+  finalizarVisita,
+} from "./tela-encerramento.js";
 
 const $ = (sel) => document.querySelector(sel);
 
 // Ordem das telas navegáveis nesta versão.
-const PASSOS = ["identificacao", "setores", "riscos"];
+const PASSOS = ["identificacao", "setores", "riscos", "encerramento"];
 let indiceAtual = 0;
 
 const btnAvancar = $("#btn-avancar");
@@ -37,6 +42,7 @@ function irPara(indice) {
   $("#tela-identificacao").hidden = passo !== "identificacao";
   $("#tela-setores").hidden = passo !== "setores";
   $("#tela-riscos").hidden = passo !== "riscos";
+  $("#tela-encerramento").hidden = passo !== "encerramento";
 
   // Atualiza indicador de passos.
   document.querySelectorAll(".passos__item").forEach((item) => {
@@ -51,10 +57,11 @@ function irPara(indice) {
 
   // Botões de navegação.
   btnVoltar.hidden = indiceAtual === 0;
-  btnAvancar.textContent = indiceAtual === PASSOS.length - 1 ? "Concluir etapa" : "Avançar";
+  btnAvancar.textContent = passo === "encerramento" ? "Finalizar visita" : "Avançar";
 
   if (passo === "setores") renderizarLista();
   if (passo === "riscos") renderizarTelaRiscos();
+  if (passo === "encerramento") renderizarTelaEncerramento();
   document.querySelector(".conteudo")?.scrollTo({ top: 0, behavior: "smooth" });
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -73,17 +80,22 @@ function inicializar() {
   inicializarTelaIdentificacao();
   inicializarTelaSetores();
   inicializarTelaRiscos();
+  inicializarTelaEncerramento();
 
   btnAvancar.addEventListener("click", () => {
     const passoAtual = PASSOS[indiceAtual];
-    if (!podeAvancarDe(passoAtual)) return;
 
-    if (indiceAtual < PASSOS.length - 1) {
-      irPara(indiceAtual + 1);
-    } else {
-      // Fim das telas implementadas (SST-03). Tela 4 (Encerramento) em issue futura.
-      alert("Etapas 1 a 3 concluídas e salvas em rascunho.\nA Tela 4 (Encerramento: não-conformidades, evidências e assinaturas) será implementada na próxima issue.");
+    if (passoAtual === "encerramento") {
+      // Última etapa: valida e finaliza a visita (assinaturas + parecer).
+      if (finalizarVisita()) {
+        btnAvancar.hidden = true;
+        btnVoltar.hidden = true;
+      }
+      return;
     }
+
+    if (!podeAvancarDe(passoAtual)) return;
+    irPara(indiceAtual + 1);
   });
 
   btnVoltar.addEventListener("click", () => irPara(indiceAtual - 1));
