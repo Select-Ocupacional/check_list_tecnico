@@ -1,0 +1,288 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://select-ocupacional.com.br/schemas/checklist-visita-tecnica/1.0.0.json",
+  "title": "Check-list de Visita Técnica (SST)",
+  "description": "Contrato de dados da Visita Técnica de SST da Select Ocupacional. Fonte única de validação de integridade (SST-01).",
+  "type": "object",
+  "$comment": "versao_schema deste contrato: 1.0.0",
+  "required": [
+    "id",
+    "status",
+    "data_visita",
+    "hora_inicio",
+    "cliente",
+    "unidade",
+    "tecnico",
+    "setores",
+    "assinaturas",
+    "auditoria"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "$ref": "#/$defs/uuid" },
+    "codigo_visita": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": ["rascunho", "concluida", "sincronizada", "cancelada"]
+    },
+    "data_visita": { "type": "string", "format": "date" },
+    "hora_inicio": { "type": "string", "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" },
+    "hora_fim": { "type": "string", "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" },
+    "cliente": { "$ref": "#/$defs/cliente" },
+    "unidade": { "$ref": "#/$defs/unidade" },
+    "tecnico": { "$ref": "#/$defs/tecnico" },
+    "setores": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/setorAvaliado" }
+    },
+    "nao_conformidades": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/naoConformidade" }
+    },
+    "assinaturas": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/assinatura" }
+    },
+    "observacoes_gerais": { "type": "string" },
+    "auditoria": { "$ref": "#/$defs/metadadosAuditoria" }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+      "description": "UUID v4 gerado no dispositivo."
+    },
+    "datetimeIso": { "type": "string", "format": "date-time" },
+    "endereco": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["logradouro", "municipio", "uf"],
+      "properties": {
+        "logradouro": { "type": "string" },
+        "numero": { "type": "string" },
+        "complemento": { "type": "string" },
+        "bairro": { "type": "string" },
+        "municipio": { "type": "string" },
+        "uf": { "type": "string", "pattern": "^[A-Z]{2}$" },
+        "cep": { "type": "string", "pattern": "^[0-9]{8}$" }
+      }
+    },
+    "cliente": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["razao_social", "cnpj"],
+      "properties": {
+        "razao_social": { "type": "string", "minLength": 1 },
+        "nome_fantasia": { "type": "string" },
+        "cnpj": { "type": "string", "pattern": "^[0-9]{14}$" },
+        "codigo_cliente_erp": { "type": "string" },
+        "contato_nome": { "type": "string" },
+        "contato_telefone": { "type": "string" }
+      }
+    },
+    "unidade": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nome", "endereco"],
+      "properties": {
+        "nome": { "type": "string", "minLength": 1 },
+        "endereco": { "$ref": "#/$defs/endereco" },
+        "cnae_principal": { "type": "string" },
+        "grau_risco": { "type": "integer", "enum": [1, 2, 3, 4] },
+        "numero_trabalhadores": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "tecnico": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "nome"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "nome": { "type": "string", "minLength": 1 },
+        "funcao": { "type": "string" },
+        "registro_profissional": { "type": "string" }
+      }
+    },
+    "setorAvaliado": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "nome"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "nome": { "type": "string", "minLength": 1 },
+        "descricao": { "type": "string" },
+        "avaliacoes_risco": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/avaliacaoRisco" }
+        },
+        "verificacoes_epi_epc": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/verificacaoEpiEpc" }
+        }
+      }
+    },
+    "avaliacaoRisco": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "grupo", "agente", "presente", "conforme"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "grupo": {
+          "type": "string",
+          "enum": ["fisico", "quimico", "biologico", "ergonomico", "acidente"]
+        },
+        "agente": { "type": "string", "minLength": 1 },
+        "fonte_geradora": { "type": "string" },
+        "presente": { "type": "boolean" },
+        "nivel_exposicao": {
+          "type": "string",
+          "enum": ["nao_avaliado", "baixo", "medio", "alto"]
+        },
+        "medidas_controle_existentes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["epc", "epi", "administrativa", "nenhuma"]
+          },
+          "uniqueItems": true
+        },
+        "conforme": {
+          "type": "string",
+          "enum": ["conforme", "nao_conforme", "nao_aplicavel"]
+        },
+        "observacao": { "type": "string" },
+        "evidencias": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidenciaFotografica" }
+        }
+      }
+    },
+    "verificacaoEpiEpc": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "tipo", "descricao", "conforme"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "tipo": { "type": "string", "enum": ["epi", "epc"] },
+        "descricao": { "type": "string", "minLength": 1 },
+        "numero_ca": { "type": "string" },
+        "fornecido": { "type": "boolean" },
+        "em_uso": { "type": "boolean" },
+        "estado_conservacao": {
+          "type": "string",
+          "enum": ["bom", "regular", "ruim", "nao_aplicavel"]
+        },
+        "conforme": {
+          "type": "string",
+          "enum": ["conforme", "nao_conforme", "nao_aplicavel"]
+        },
+        "observacao": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "$comment": "Regra 3: numero_ca obrigatorio para EPI.",
+          "if": {
+            "properties": { "tipo": { "const": "epi" } },
+            "required": ["tipo"]
+          },
+          "then": { "required": ["numero_ca"] }
+        }
+      ]
+    },
+    "naoConformidade": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "descricao", "gravidade", "recomendacao"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "descricao": { "type": "string", "minLength": 1 },
+        "origem_ref": { "$ref": "#/$defs/uuid" },
+        "gravidade": {
+          "type": "string",
+          "enum": ["baixa", "media", "alta", "critica"]
+        },
+        "norma_referencia": { "type": "string" },
+        "recomendacao": { "type": "string", "minLength": 1 },
+        "prazo_sugerido_dias": { "type": "integer", "minimum": 0 },
+        "evidencias": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidenciaFotografica" }
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "Regra 5: gravidade alta/critica exige ao menos uma evidencia fotografica.",
+          "if": {
+            "properties": {
+              "gravidade": { "enum": ["alta", "critica"] }
+            },
+            "required": ["gravidade"]
+          },
+          "then": {
+            "properties": {
+              "evidencias": { "type": "array", "minItems": 1 }
+            },
+            "required": ["evidencias"]
+          }
+        }
+      ]
+    },
+    "evidenciaFotografica": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "arquivo_ref"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "arquivo_ref": { "type": "string", "minLength": 1 },
+        "legenda": { "type": "string" },
+        "capturada_em": { "$ref": "#/$defs/datetimeIso" },
+        "geolocalizacao": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["lat", "lng"],
+          "properties": {
+            "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+            "lng": { "type": "number", "minimum": -180, "maximum": 180 }
+          }
+        }
+      }
+    },
+    "assinatura": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "papel", "nome", "assinatura_ref", "assinado_em"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "papel": { "type": "string", "enum": ["tecnico", "responsavel_empresa"] },
+        "nome": { "type": "string", "minLength": 1 },
+        "cargo": { "type": "string" },
+        "documento": {
+          "type": "string",
+          "description": "CPF do responsavel. DADO SENSIVEL (LGPD) - restringir exposicao.",
+          "pattern": "^[0-9]{11}$"
+        },
+        "assinatura_ref": { "type": "string", "minLength": 1 },
+        "assinado_em": { "$ref": "#/$defs/datetimeIso" }
+      }
+    },
+    "metadadosAuditoria": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["criado_em", "atualizado_em", "versao_schema"],
+      "properties": {
+        "criado_em": { "$ref": "#/$defs/datetimeIso" },
+        "atualizado_em": { "$ref": "#/$defs/datetimeIso" },
+        "sincronizado_em": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Nulo enquanto a visita nao foi sincronizada (offline-first)."
+        },
+        "dispositivo_id": { "type": "string" },
+        "versao_app": { "type": "string" },
+        "versao_schema": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" }
+      }
+    }
+  }
+}
