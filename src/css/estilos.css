@@ -1,0 +1,257 @@
+/* =========================================================
+   Check-list de Visita Técnica — Estilos (mobile-first)
+   Paleta e tipografia conforme CLAUDE.md da Select Ocupacional.
+   [VERIFICAR TIPOGRAFIA] — Inter é interina até validação formal.
+   ========================================================= */
+
+:root {
+  /* Paleta institucional (CLAUDE.md §5) */
+  --navy: #0D1B3E;
+  --teal: #1BA89D;
+  --teal-escuro: #158a81;
+  --branco: #FFFFFF;
+  --cinza-claro: #F5F5F5;
+  --cinza-medio: #6B7280;
+  --cinza-borda: #D8DCE3;
+  --erro: #C0392B;
+  --erro-fundo: #FDECEA;
+
+  /* Alvos de toque confortáveis para uso em campo */
+  --altura-toque: 48px;
+  --raio: 10px;
+  --espaco: 16px;
+
+  --fonte: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--fonte);
+  color: var(--navy);
+  background: var(--cinza-claro);
+  font-size: 16px;                 /* base ≥16px evita zoom automático no iOS */
+  line-height: 1.45;
+}
+
+/* --------- Cabeçalho --------- */
+.app-header {
+  background: var(--navy);
+  color: var(--branco);
+  padding: 12px var(--espaco);
+  padding-top: calc(12px + env(safe-area-inset-top));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.app-header__marca { display: flex; align-items: center; gap: 12px; }
+.app-header__logo {
+  display: grid;
+  place-items: center;
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  background: var(--teal);
+  color: var(--branco);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  flex: 0 0 auto;
+}
+.app-header__titulo { font-size: 1rem; font-weight: 600; margin: 0; }
+.app-header__subtitulo { font-size: 0.75rem; margin: 0; color: #B9C2D6; }
+.tag-rascunho {
+  font-size: 0.7rem;
+  background: rgba(27,168,157,0.18);
+  color: #8FE3DA;
+  border: 1px solid var(--teal);
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* --------- Indicador de passos --------- */
+.passos {
+  background: var(--branco);
+  border-bottom: 1px solid var(--cinza-borda);
+  overflow-x: auto;
+}
+.passos__lista {
+  list-style: none;
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  padding: 10px var(--espaco);
+  min-width: max-content;
+}
+.passos__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--cinza-medio);
+  white-space: nowrap;
+}
+.passos__num {
+  display: grid; place-items: center;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--cinza-claro);
+  border: 1px solid var(--cinza-borda);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.passos__item[aria-current="step"] { color: var(--navy); font-weight: 600; }
+.passos__item[aria-current="step"] .passos__num {
+  background: var(--teal); color: var(--branco); border-color: var(--teal);
+}
+.passos__item--concluido .passos__num {
+  background: var(--navy); color: var(--branco); border-color: var(--navy);
+}
+.passos__item--futuro { opacity: 0.55; }
+
+/* --------- Conteúdo / telas --------- */
+.conteudo {
+  padding: var(--espaco);
+  padding-bottom: 96px;            /* espaço para o rodapé fixo */
+  max-width: 720px;
+  margin: 0 auto;
+}
+.tela__titulo { font-size: 1.15rem; margin: 4px 0 4px; }
+.tela__ajuda { color: var(--cinza-medio); font-size: 0.9rem; margin: 0 0 16px; }
+
+/* --------- Formulários --------- */
+.grupo {
+  border: 1px solid var(--cinza-borda);
+  border-radius: var(--raio);
+  background: var(--branco);
+  padding: 14px;
+  margin: 0 0 14px;
+}
+.grupo__legenda {
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--teal-escuro);
+  padding: 0 6px;
+}
+.campo { display: flex; flex-direction: column; margin-bottom: 12px; }
+.campo:last-child { margin-bottom: 0; }
+.campo label { font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--navy);
+  background: var(--branco);
+  border: 1px solid var(--cinza-borda);
+  border-radius: var(--raio);
+  padding: 0 12px;
+  min-height: var(--altura-toque);   /* alvo de toque confortável */
+  width: 100%;
+}
+textarea { padding: 10px 12px; min-height: 64px; resize: vertical; line-height: 1.4; }
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(27,168,157,0.22);
+}
+input.invalido, select.invalido, textarea.invalido {
+  border-color: var(--erro);
+  background: var(--erro-fundo);
+}
+.campo__erro { color: var(--erro); font-size: 0.78rem; margin-top: 5px; min-height: 1em; }
+
+/* Linhas responsivas: empilham no celular, lado a lado no maior */
+.campo-linha { display: flex; flex-direction: column; gap: 12px; }
+.campo-linha .campo { margin-bottom: 0; }
+
+.nota-norma { font-size: 0.75rem; color: var(--cinza-medio); margin: 4px 2px 0; }
+.nota-norma em { color: var(--teal-escuro); font-style: normal; font-weight: 600; }
+
+/* --------- Setores (Tela 2) --------- */
+.setor-form {
+  border: 1px dashed var(--teal);
+  border-radius: var(--raio);
+  background: var(--branco);
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.lista-setores { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.setor-card {
+  background: var(--branco);
+  border: 1px solid var(--cinza-borda);
+  border-left: 4px solid var(--teal);
+  border-radius: var(--raio);
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.setor-card__info { min-width: 0; }
+.setor-card__nome { font-weight: 600; margin: 0 0 2px; overflow-wrap: anywhere; }
+.setor-card__desc { font-size: 0.85rem; color: var(--cinza-medio); margin: 0; overflow-wrap: anywhere; }
+.setor-card__remover {
+  flex: 0 0 auto;
+  background: transparent;
+  border: 1px solid var(--cinza-borda);
+  color: var(--erro);
+  border-radius: 8px;
+  min-width: 40px; min-height: 40px;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.setor-card__remover:hover { background: var(--erro-fundo); border-color: var(--erro); }
+.lista-vazia { color: var(--cinza-medio); font-size: 0.9rem; text-align: center; padding: 18px; }
+
+/* --------- Botões --------- */
+.btn {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  min-height: var(--altura-toque);
+  padding: 0 20px;
+  border-radius: var(--raio);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+.btn--bloco { width: 100%; }
+.btn--primario { background: var(--teal); color: var(--branco); }
+.btn--primario:hover { background: var(--teal-escuro); }
+.btn--secundario { background: transparent; color: var(--teal-escuro); border-color: var(--teal); }
+.btn--secundario:hover { background: rgba(27,168,157,0.10); }
+.btn--fantasma { background: transparent; color: var(--navy); border-color: var(--cinza-borda); }
+.btn--fantasma:hover { background: var(--cinza-claro); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* --------- Rodapé de navegação --------- */
+.rodape-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--branco);
+  border-top: 1px solid var(--cinza-borda);
+  padding: 12px var(--espaco);
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 10;
+}
+.rodape-nav__espaco { flex: 1; }
+.rodape-nav .btn { min-width: 120px; }
+
+/* --------- Responsivo: tablets e telas maiores --------- */
+@media (min-width: 600px) {
+  .campo-linha { flex-direction: row; }
+  .campo-linha .campo { flex: 1; }
+  .campo-linha .campo--pequeno { flex: 0 0 120px; }
+  .campo-linha .campo--grande { flex: 3; }
+  .app-header__titulo { font-size: 1.1rem; }
+}

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Mobile-first: viewport ajustado para uso em celular/tablet em campo -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0D1B3E" />
+  <title>Check-list de Visita Técnica — Select Ocupacional</title>
+  <link rel="stylesheet" href="css/estilos.css" />
+</head>
+<body>
+  <!-- Cabeçalho de marca (Navy) -->
+  <header class="app-header">
+    <div class="app-header__marca">
+      <span class="app-header__logo" aria-hidden="true">SO</span>
+      <div>
+        <h1 class="app-header__titulo">Check-list de Visita Técnica</h1>
+        <p class="app-header__subtitulo">Select Ocupacional — SST</p>
+      </div>
+    </div>
+    <span id="indicador-rascunho" class="tag-rascunho" hidden>Rascunho salvo</span>
+  </header>
+
+  <!-- Indicador de etapas -->
+  <nav class="passos" aria-label="Progresso do check-list">
+    <ol class="passos__lista">
+      <li class="passos__item" data-passo="identificacao" aria-current="step">
+        <span class="passos__num">1</span> Identificação
+      </li>
+      <li class="passos__item" data-passo="setores">
+        <span class="passos__num">2</span> Setores
+      </li>
+      <li class="passos__item passos__item--futuro" aria-disabled="true">
+        <span class="passos__num">3</span> Riscos e EPIs
+      </li>
+      <li class="passos__item passos__item--futuro" aria-disabled="true">
+        <span class="passos__num">4</span> Encerramento
+      </li>
+    </ol>
+  </nav>
+
+  <main class="conteudo">
+    <!-- ============ TELA 1 — IDENTIFICAÇÃO ============ -->
+    <section id="tela-identificacao" class="tela" aria-labelledby="titulo-identificacao">
+      <h2 id="titulo-identificacao" class="tela__titulo">Identificação da visita</h2>
+      <p class="tela__ajuda">Preencha os dados do cliente, da unidade visitada e do técnico responsável.</p>
+
+      <form id="form-identificacao" novalidate>
+        <fieldset class="grupo">
+          <legend class="grupo__legenda">Dados da visita</legend>
+          <div class="campo-linha">
+            <div class="campo">
+              <label for="data_visita">Data da visita *</label>
+              <input type="date" id="data_visita" name="data_visita" required />
+              <small class="campo__erro" data-erro="data_visita"></small>
+            </div>
+            <div class="campo">
+              <label for="hora_inicio">Hora de início *</label>
+              <input type="time" id="hora_inicio" name="hora_inicio" required />
+              <small class="campo__erro" data-erro="hora_inicio"></small>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="grupo">
+          <legend class="grupo__legenda">Cliente (empresa visitada)</legend>
+          <div class="campo">
+            <label for="razao_social">Razão social *</label>
+            <input type="text" id="razao_social" name="razao_social" autocomplete="off" required />
+            <small class="campo__erro" data-erro="razao_social"></small>
+          </div>
+          <div class="campo-linha">
+            <div class="campo">
+              <label for="nome_fantasia">Nome fantasia</label>
+              <input type="text" id="nome_fantasia" name="nome_fantasia" autocomplete="off" />
+            </div>
+            <div class="campo">
+              <label for="cnpj">CNPJ *</label>
+              <input type="text" id="cnpj" name="cnpj" inputmode="numeric"
+                     maxlength="18" placeholder="00.000.000/0000-00" required />
+              <small class="campo__erro" data-erro="cnpj"></small>
+            </div>
+          </div>
+          <div class="campo-linha">
+            <div class="campo">
+              <label for="contato_nome">Contato no cliente</label>
+              <input type="text" id="contato_nome" name="contato_nome" autocomplete="off" />
+            </div>
+            <div class="campo">
+              <label for="contato_telefone">Telefone do contato</label>
+              <input type="tel" id="contato_telefone" name="contato_telefone" inputmode="tel" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="grupo">
+          <legend class="grupo__legenda">Unidade visitada</legend>
+          <div class="campo">
+            <label for="unidade_nome">Nome da unidade *</label>
+            <input type="text" id="unidade_nome" name="unidade_nome"
+                   placeholder="Ex.: Matriz, Filial CD Campinas" autocomplete="off" required />
+            <small class="campo__erro" data-erro="unidade_nome"></small>
+          </div>
+          <div class="campo-linha">
+            <div class="campo campo--grande">
+              <label for="logradouro">Logradouro *</label>
+              <input type="text" id="logradouro" name="logradouro" autocomplete="off" required />
+              <small class="campo__erro" data-erro="logradouro"></small>
+            </div>
+            <div class="campo campo--pequeno">
+              <label for="numero">Número</label>
+              <input type="text" id="numero" name="numero" inputmode="numeric" autocomplete="off" />
+            </div>
+          </div>
+          <div class="campo-linha">
+            <div class="campo">
+              <label for="bairro">Bairro</label>
+              <input type="text" id="bairro" name="bairro" autocomplete="off" />
+            </div>
+            <div class="campo">
+              <label for="municipio">Município *</label>
+              <input type="text" id="municipio" name="municipio" autocomplete="off" required />
+              <small class="campo__erro" data-erro="municipio"></small>
+            </div>
+            <div class="campo campo--pequeno">
+              <label for="uf">UF *</label>
+              <input type="text" id="uf" name="uf" maxlength="2" placeholder="SP"
+                     autocapitalize="characters" required />
+              <small class="campo__erro" data-erro="uf"></small>
+            </div>
+          </div>
+          <div class="campo-linha">
+            <div class="campo campo--pequeno">
+              <label for="grau_risco">Grau de risco</label>
+              <select id="grau_risco" name="grau_risco">
+                <option value="">—</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+              </select>
+            </div>
+            <div class="campo campo--pequeno">
+              <label for="numero_trabalhadores">Nº de trabalhadores</label>
+              <input type="number" id="numero_trabalhadores" name="numero_trabalhadores"
+                     min="0" inputmode="numeric" />
+            </div>
+          </div>
+          <p class="nota-norma">Grau de risco conforme NR-04/CNAE. <em>[VERIFICAR VIGÊNCIA DA NORMA]</em></p>
+        </fieldset>
+
+        <fieldset class="grupo">
+          <legend class="grupo__legenda">Técnico responsável</legend>
+          <div class="campo">
+            <label for="tecnico_nome">Nome do técnico *</label>
+            <input type="text" id="tecnico_nome" name="tecnico_nome" autocomplete="off" required />
+            <small class="campo__erro" data-erro="tecnico_nome"></small>
+          </div>
+          <div class="campo-linha">
+            <div class="campo">
+              <label for="tecnico_funcao">Função</label>
+              <input type="text" id="tecnico_funcao" name="tecnico_funcao"
+                     placeholder="Ex.: Téc. Seg. Trabalho" autocomplete="off" />
+            </div>
+            <div class="campo">
+              <label for="tecnico_registro">Registro profissional</label>
+              <input type="text" id="tecnico_registro" name="tecnico_registro" autocomplete="off" />
+            </div>
+          </div>
+        </fieldset>
+      </form>
+    </section>
+
+    <!-- ============ TELA 2 — SETORES ============ -->
+    <section id="tela-setores" class="tela" aria-labelledby="titulo-setores" hidden>
+      <h2 id="titulo-setores" class="tela__titulo">Setores avaliados</h2>
+      <p class="tela__ajuda">Cadastre cada setor, ambiente ou posto percorrido na vistoria. É necessário ao menos um.</p>
+
+      <form id="form-novo-setor" class="setor-form" novalidate>
+        <div class="campo">
+          <label for="setor_nome">Nome do setor *</label>
+          <input type="text" id="setor_nome" name="setor_nome"
+                 placeholder="Ex.: Produção — Linha 2, Almoxarifado" autocomplete="off" />
+          <small class="campo__erro" data-erro="setor_nome"></small>
+        </div>
+        <div class="campo">
+          <label for="setor_descricao">Descrição (opcional)</label>
+          <textarea id="setor_descricao" name="setor_descricao" rows="2"></textarea>
+        </div>
+        <button type="submit" class="btn btn--secundario btn--bloco">+ Adicionar setor</button>
+      </form>
+
+      <ul id="lista-setores" class="lista-setores" aria-live="polite"></ul>
+      <p id="setores-vazio" class="lista-vazia">Nenhum setor cadastrado ainda.</p>
+    </section>
+  </main>
+
+  <!-- Barra de navegação inferior (fixa, mobile-first) -->
+  <footer class="rodape-nav">
+    <button type="button" id="btn-voltar" class="btn btn--fantasma" hidden>Voltar</button>
+    <span class="rodape-nav__espaco"></span>
+    <button type="button" id="btn-avancar" class="btn btn--primario">Avançar</button>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
