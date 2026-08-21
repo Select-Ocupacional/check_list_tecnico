@@ -372,6 +372,46 @@ export function atualizarRisco(setorId, riscoId, patch) {
   return risco;
 }
 
+/* ---------- Evidências fotográficas do risco (SST-15) ---------- */
+
+/** Adiciona uma evidência (foto) a um risco. arquivo_ref = data URL (offline). */
+export function adicionarEvidencia(setorId, riscoId, { arquivo_ref, legenda, capturada_em }) {
+  const setor = obterSetor(setorId);
+  const risco = setor?.avaliacoes_risco.find((r) => r.id === riscoId);
+  if (!risco) return null;
+  if (!Array.isArray(risco.evidencias)) risco.evidencias = [];
+  const ev = {
+    id: gerarUuid(),
+    arquivo_ref,
+    capturada_em: capturada_em || agoraIso(),
+  };
+  if (legenda && legenda.trim()) ev.legenda = legenda.trim();
+  risco.evidencias.push(ev);
+  salvar();
+  return ev;
+}
+
+/** Atualiza a legenda (ou outros campos) de uma evidência. */
+export function atualizarEvidencia(setorId, riscoId, evidenciaId, patch) {
+  const setor = obterSetor(setorId);
+  const risco = setor?.avaliacoes_risco.find((r) => r.id === riscoId);
+  const ev = risco?.evidencias?.find((e) => e.id === evidenciaId);
+  if (!ev) return null;
+  Object.assign(ev, patch);
+  if (!ev.legenda || !String(ev.legenda).trim()) delete ev.legenda;
+  salvar();
+  return ev;
+}
+
+/** Remove uma evidência de um risco. */
+export function removerEvidencia(setorId, riscoId, evidenciaId) {
+  const setor = obterSetor(setorId);
+  const risco = setor?.avaliacoes_risco.find((r) => r.id === riscoId);
+  if (!risco?.evidencias) return;
+  risco.evidencias = risco.evidencias.filter((e) => e.id !== evidenciaId);
+  salvar();
+}
+
 /* ---------- EPI / EPC (por setor) ---------- */
 
 /** Adiciona uma VerificacaoEpiEpc ao setor e persiste. */

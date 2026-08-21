@@ -395,6 +395,41 @@ input.invalido, select.invalido, textarea.invalido {
 /* --------- Cartão de EPI/EPC em alerta --------- */
 .setor-card--alerta { border-left-color: var(--erro); }
 
+/* --------- Fotos (evidências) do risco --------- */
+.risco-fotos { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 8px; }
+.risco-foto {
+  margin: 0;
+  width: 96px;
+  position: relative;
+}
+.risco-foto img {
+  width: 96px; height: 96px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--cinza-borda);
+  display: block;
+}
+.risco-foto__legenda {
+  width: 96px;
+  min-height: 32px;
+  font-size: 0.75rem;
+  padding: 0 6px;
+  margin-top: 4px;
+}
+.risco-foto__remover {
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(13,27,62,0.8);
+  color: #fff;
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.risco-foto-input { font-size: 0.85rem; }
+
 /* --------- GHE (Grupos Homogêneos de Exposição) --------- */
 .ghe-card {
   background: var(--branco);
@@ -640,6 +675,10 @@ input.invalido, select.invalido, textarea.invalido {
 .rel-tab th, .rel-tab td { border: 1px solid #ccc; padding: 3px 5px; text-align: left; vertical-align: top; }
 .rel-tab th { background: #f0f0f0; font-size: 10px; }
 .rel-parecer { white-space: pre-wrap; }
+.rel-fotos { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0; }
+.rel-fotos figure { margin: 0; width: 150px; break-inside: avoid; }
+.rel-fotos img { width: 150px; height: 110px; object-fit: cover; border: 1px solid #ccc; border-radius: 4px; }
+.rel-fotos figcaption { font-size: 9px; color: #555; margin-top: 2px; }
 .rel-assinaturas { display: flex; gap: 24px; margin-top: 18px; flex-wrap: wrap; }
 .rel-assinatura { flex: 1 1 200px; text-align: center; }
 .rel-assinatura img { max-height: 70px; max-width: 100%; }

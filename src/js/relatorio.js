@@ -112,6 +112,15 @@ function blocoRiscos(v) {
                   }).join("")}
                 </tbody>
               </table>` : `<p class="rel-desc">Nenhum risco registrado.</p>`}
+            ${(() => {
+              const fotos = riscos.flatMap((r) => (r.evidencias || []).map((e) => ({ agente: r.agente, ...e })));
+              if (!fotos.length) return "";
+              return `
+                <p class="rel-rot" style="margin-top:6px">Evidências fotográficas</p>
+                <div class="rel-fotos">
+                  ${fotos.map((f) => `<figure><img src="${f.arquivo_ref}" alt="Evidência" /><figcaption>${esc(f.agente)}${f.legenda ? " — " + esc(f.legenda) : ""}</figcaption></figure>`).join("")}
+                </div>`;
+            })()}
             ${epis.length ? `
               <p class="rel-rot" style="margin-top:6px">EPIs / EPCs</p>
               <table class="rel-tab">

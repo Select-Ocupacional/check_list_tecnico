@@ -12,8 +12,12 @@ import {
   atualizarRisco,
   adicionarEpiEpc,
   removerEpiEpc,
+  adicionarEvidencia,
+  atualizarEvidencia,
+  removerEvidencia,
 } from "./estado.js";
 import { GRUPOS, CATALOGO_RISCOS } from "./catalogo-riscos.js";
+import { comprimirImagem } from "./imagem.js";
 
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
 
@@ -136,8 +140,81 @@ function construirDetalheRisco(risco) {
   linha.append(inData, inHora, inEquip);
   campoQuant.append(rotQuant, dicaQuant, linha);
 
-  wrap.append(campoNivel, campoObs, campoQuant);
+  wrap.append(campoNivel, campoObs, campoQuant, construirEvidencias(risco));
   return wrap;
+}
+
+/** Bloco de fotos (evidências) do risco: captura, galeria e legendas. */
+function construirEvidencias(risco) {
+  const campo = document.createElement("div");
+  campo.className = "campo";
+
+  const rot = document.createElement("span");
+  rot.className = "rotulo-grupo";
+  rot.textContent = "Fotos (evidências)";
+
+  const galeria = document.createElement("div");
+  galeria.className = "risco-fotos";
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.setAttribute("capture", "environment"); // abre a câmera no celular
+  input.className = "risco-foto-input";
+
+  const renderGaleria = () => {
+    galeria.innerHTML = "";
+    (risco.evidencias || []).forEach((ev) => {
+      const fig = document.createElement("figure");
+      fig.className = "risco-foto";
+
+      const img = document.createElement("img");
+      img.src = ev.arquivo_ref;
+      img.alt = ev.legenda || "Evidência";
+      img.loading = "lazy";
+
+      const legenda = document.createElement("input");
+      legenda.type = "text";
+      legenda.placeholder = "Legenda (opcional)";
+      legenda.className = "risco-foto__legenda";
+      legenda.value = ev.legenda || "";
+      legenda.addEventListener("input", () =>
+        atualizarEvidencia(setorAtivoId, risco.id, ev.id, { legenda: legenda.value })
+      );
+
+      const remover = document.createElement("button");
+      remover.type = "button";
+      remover.className = "risco-foto__remover";
+      remover.setAttribute("aria-label", "Remover foto");
+      remover.textContent = "✕";
+      remover.addEventListener("click", () => {
+        removerEvidencia(setorAtivoId, risco.id, ev.id);
+        renderGaleria();
+      });
+
+      fig.append(img, legenda, remover);
+      galeria.appendChild(fig);
+    });
+  };
+  renderGaleria();
+
+  input.addEventListener("change", async () => {
+    const arquivos = Array.from(input.files || []);
+    for (const arquivo of arquivos) {
+      if (!arquivo.type.startsWith("image/")) continue;
+      try {
+        const dataUrl = await comprimirImagem(arquivo);
+        adicionarEvidencia(setorAtivoId, risco.id, { arquivo_ref: dataUrl });
+      } catch (e) {
+        console.warn("Falha ao processar a foto:", e);
+      }
+    }
+    input.value = "";
+    renderGaleria();
+  });
+
+  campo.append(rot, galeria, input);
+  return campo;
 }
 
 /** Renderiza todos os grupos e agentes de risco do setor ativo. */
