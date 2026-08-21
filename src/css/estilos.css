@@ -436,6 +436,8 @@ input.invalido, select.invalido, textarea.invalido {
   cursor: pointer;
 }
 .risco-foto-input { font-size: 0.85rem; }
+.risco-fotos-acoes { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.risco-fotos-acoes .btn { min-height: 44px; flex: 1 1 auto; }
 
 /* --------- GHE (Grupos Homogêneos de Exposição) --------- */
 .ghe-card {
@@ -476,6 +478,8 @@ input.invalido, select.invalido, textarea.invalido {
 }
 .ghe-func-check:hover { background: var(--cinza-claro); }
 .ghe-func-check input { width: 20px; height: 20px; flex: 0 0 auto; accent-color: var(--teal); }
+.ghe-func-check--indisponivel { opacity: 0.55; cursor: not-allowed; }
+.ghe-func-check--indisponivel span { color: var(--cinza-medio); }
 
 /* --------- Tela 4: assinatura em canvas --------- */
 .assinatura__ajuda { font-size: 0.85rem; color: var(--cinza-medio); margin: 0 0 8px; }

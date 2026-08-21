@@ -8,7 +8,7 @@
    para forçar a atualização do cache nos dispositivos.
    ========================================================= */
 
-const CACHE_VERSAO = "clt-v16";
+const CACHE_VERSAO = "clt-v17";
 
 // App shell — tudo que o app precisa para abrir offline.
 const ASSETS = [

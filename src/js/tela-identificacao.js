@@ -10,7 +10,7 @@ import {
   adicionarContato,
   removerContato,
 } from "./estado.js";
-import { validarIdentificacao, formatarCnpj, formatarCep, formatarCnae, apenasDigitos } from "./validacao.js";
+import { validarIdentificacao, formatarCnpj, formatarCep, formatarCnae, formatarTelefone, apenasDigitos } from "./validacao.js";
 import { grauPorCnae } from "./tabela-cnae-nr04.js";
 
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
@@ -221,6 +221,10 @@ export function inicializarTelaIdentificacao() {
       dica.textContent = "";
     }
   });
+
+  // Máscara viva de telefone do contato.
+  const tel = $("#novo_contato_telefone");
+  tel?.addEventListener("input", () => { tel.value = formatarTelefone(tel.value); });
 
   // Adicionar contato (botão dedicado — não é submit, para não enviar o form).
   $("#btn-add-contato")?.addEventListener("click", tratarAdicionarContato);

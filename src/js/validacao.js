@@ -88,6 +88,22 @@ export function formatarCnae(valor) {
     .replace(/^(\d{4})-(\d)(\d)/, "$1-$2/$3");
 }
 
+/** Formata telefone: (00) 0000-0000 (fixo) ou (00) 00000-0000 (celular). */
+export function formatarTelefone(valor) {
+  const c = apenasDigitos(valor).slice(0, 11);
+  const p = [];
+  if (c.length > 0) p.push("(" + c.slice(0, 2));
+  if (c.length >= 2) p.push(") ");
+  if (c.length > 2 && c.length <= 6) {
+    p.push(c.slice(2));
+  } else if (c.length > 6 && c.length <= 10) {
+    p.push(c.slice(2, 6) + "-" + c.slice(6)); // fixo
+  } else if (c.length > 6) {
+    p.push(c.slice(2, 7) + "-" + c.slice(7)); // celular
+  }
+  return p.join("");
+}
+
 /** Formata CEP para exibição: 00000-000. */
 export function formatarCep(valor) {
   const c = apenasDigitos(valor).slice(0, 8);

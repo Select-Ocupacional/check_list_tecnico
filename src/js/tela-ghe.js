@@ -45,16 +45,27 @@ function construirSeletorFuncoes(ghe, disponiveis, aoAlterar) {
       const label = document.createElement("label");
       label.className = "ghe-func-check";
 
+      const nesteGhe = refs.includes(f.funcaoId);
+      const outroGhe = (estado.visita.ghes || []).find(
+        (g) => g.id !== ghe.id && (g.funcoes_ref || []).includes(f.funcaoId)
+      );
+
       const chk = document.createElement("input");
       chk.type = "checkbox";
-      chk.checked = refs.includes(f.funcaoId);
+      chk.checked = nesteGhe;
+      // Uma função pertence a um único GHE: se já está em outro, fica desabilitada aqui.
+      if (outroGhe && !nesteGhe) {
+        chk.disabled = true;
+        label.classList.add("ghe-func-check--indisponivel");
+      }
       chk.addEventListener("change", () => {
         alternarFuncaoNoGhe(ghe.id, f.funcaoId);
-        if (aoAlterar) aoAlterar();
+        renderizarTelaGhe(); // re-render p/ manter a exclusividade consistente entre GHEs
       });
 
       const txt = document.createElement("span");
       txt.textContent = f.funcaoNome + (f.quantidade != null ? ` (${f.quantidade})` : "");
+      if (outroGhe && !nesteGhe) txt.textContent += ` — já em ${outroGhe.nome}`;
 
       label.append(chk, txt);
       grupo.appendChild(label);

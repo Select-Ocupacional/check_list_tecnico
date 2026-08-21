@@ -157,12 +157,6 @@ function construirEvidencias(risco) {
   const galeria = document.createElement("div");
   galeria.className = "risco-fotos";
 
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/*";
-  input.setAttribute("capture", "environment"); // abre a câmera no celular
-  input.className = "risco-foto-input";
-
   const renderGaleria = () => {
     galeria.innerHTML = "";
     (risco.evidencias || []).forEach((ev) => {
@@ -199,9 +193,9 @@ function construirEvidencias(risco) {
   };
   renderGaleria();
 
-  input.addEventListener("change", async () => {
-    const arquivos = Array.from(input.files || []);
-    for (const arquivo of arquivos) {
+  // Processa um ou mais arquivos de imagem (câmera ou galeria).
+  const processar = async (files) => {
+    for (const arquivo of Array.from(files || [])) {
       if (!arquivo.type.startsWith("image/")) continue;
       try {
         const dataUrl = await comprimirImagem(arquivo);
@@ -210,11 +204,39 @@ function construirEvidencias(risco) {
         console.warn("Falha ao processar a foto:", e);
       }
     }
-    input.value = "";
     renderGaleria();
-  });
+  };
 
-  campo.append(rot, galeria, input);
+  // Input de câmera (capture) e input de arquivo (galeria) — ocultos, acionados por botões.
+  const inputCamera = document.createElement("input");
+  inputCamera.type = "file";
+  inputCamera.accept = "image/*";
+  inputCamera.setAttribute("capture", "environment");
+  inputCamera.hidden = true;
+  inputCamera.addEventListener("change", () => { processar(inputCamera.files); inputCamera.value = ""; });
+
+  const inputArquivo = document.createElement("input");
+  inputArquivo.type = "file";
+  inputArquivo.accept = "image/*";
+  inputArquivo.multiple = true;
+  inputArquivo.hidden = true;
+  inputArquivo.addEventListener("change", () => { processar(inputArquivo.files); inputArquivo.value = ""; });
+
+  const acoes = document.createElement("div");
+  acoes.className = "risco-fotos-acoes";
+  const btnCam = document.createElement("button");
+  btnCam.type = "button";
+  btnCam.className = "btn btn--secundario";
+  btnCam.textContent = "📷 Tirar foto";
+  btnCam.addEventListener("click", () => inputCamera.click());
+  const btnArq = document.createElement("button");
+  btnArq.type = "button";
+  btnArq.className = "btn btn--fantasma";
+  btnArq.textContent = "🖼️ Enviar arquivo";
+  btnArq.addEventListener("click", () => inputArquivo.click());
+  acoes.append(btnCam, btnArq);
+
+  campo.append(rot, galeria, acoes, inputCamera, inputArquivo);
   return campo;
 }
 
