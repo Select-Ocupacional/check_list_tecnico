@@ -97,6 +97,17 @@
       ]
     }
   ],
+  "ghes": [
+    {
+      "id": "9e5e1c00-1111-4a22-8b33-4455667789a1",
+      "nome": "GHE 01 - Producao",
+      "descricao": "Funcoes expostas a ruido na linha de corte.",
+      "funcoes_ref": [
+        "f1a2b3c4-1111-4a22-8b33-445566778911",
+        "f1a2b3c4-2222-4a22-8b33-445566778912"
+      ]
+    }
+  ],
   "nao_conformidades": [
     {
       "id": "a7b8c9d0-7777-4a22-8b33-445566778855",
@@ -142,6 +153,6 @@
     "sincronizado_em": null,
     "dispositivo_id": "tablet-tecnico-07",
     "versao_app": "1.0.0",
-    "versao_schema": "1.5.0"
+    "versao_schema": "1.6.0"
   }
 }

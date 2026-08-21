@@ -26,6 +26,10 @@ import {
   renderizarTelaRiscos,
 } from "./tela-riscos.js";
 import {
+  inicializarTelaGhe,
+  renderizarTelaGhe,
+} from "./tela-ghe.js";
+import {
   inicializarTelaEncerramento,
   renderizarTelaEncerramento,
   resetarEncerramento,
@@ -35,7 +39,7 @@ import {
 const $ = (sel) => document.querySelector(sel);
 
 // Ordem das etapas do assistente.
-const PASSOS = ["identificacao", "setores", "riscos", "encerramento"];
+const PASSOS = ["identificacao", "setores", "riscos", "ghe", "encerramento"];
 let indiceAtual = 0;
 
 const btnAvancar = $("#btn-avancar");
@@ -140,6 +144,7 @@ function irPara(indice) {
   $("#tela-identificacao").hidden = passo !== "identificacao";
   $("#tela-setores").hidden = passo !== "setores";
   $("#tela-riscos").hidden = passo !== "riscos";
+  $("#tela-ghe").hidden = passo !== "ghe";
   $("#tela-encerramento").hidden = passo !== "encerramento";
 
   document.querySelectorAll(".passos__item").forEach((item) => {
@@ -157,6 +162,7 @@ function irPara(indice) {
 
   if (passo === "setores") renderizarLista();
   if (passo === "riscos") renderizarTelaRiscos();
+  if (passo === "ghe") renderizarTelaGhe();
   if (passo === "encerramento") renderizarTelaEncerramento();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -173,6 +179,7 @@ async function inicializar() {
   inicializarTelaIdentificacao();
   inicializarTelaSetores();
   inicializarTelaRiscos();
+  inicializarTelaGhe();
   inicializarTelaEncerramento();
 
   btnAvancar.addEventListener("click", () => {

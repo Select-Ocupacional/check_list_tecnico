@@ -395,6 +395,46 @@ input.invalido, select.invalido, textarea.invalido {
 /* --------- Cartão de EPI/EPC em alerta --------- */
 .setor-card--alerta { border-left-color: var(--erro); }
 
+/* --------- GHE (Grupos Homogêneos de Exposição) --------- */
+.ghe-card {
+  background: var(--branco);
+  border: 1px solid var(--cinza-borda);
+  border-left: 4px solid var(--navy);
+  border-radius: var(--raio);
+  padding: 12px 14px;
+}
+.ghe-card__topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ghe-funcoes {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--cinza-borda);
+}
+.ghe-setor-grupo { margin-top: 8px; }
+.ghe-setor-titulo {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--teal-escuro);
+  margin: 4px 0;
+}
+.ghe-func-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.ghe-func-check:hover { background: var(--cinza-claro); }
+.ghe-func-check input { width: 20px; height: 20px; flex: 0 0 auto; accent-color: var(--teal); }
+
 /* --------- Tela 4: assinatura em canvas --------- */
 .assinatura__ajuda { font-size: 0.85rem; color: var(--cinza-medio); margin: 0 0 8px; }
 .assinatura {

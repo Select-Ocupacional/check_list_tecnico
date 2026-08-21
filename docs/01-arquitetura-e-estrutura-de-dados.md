@@ -63,6 +63,7 @@ erDiagram
 | `unidade` | objeto `Unidade` | ✅ | Ver 3.3. |
 | `tecnico` | objeto `Tecnico` | ✅ | Ver 3.4. |
 | `setores` | array `SetorAvaliado` | ✅ (≥1) | Ver 3.5. |
+| `ghes` | array `GHE` | ⬜ | **schema 1.6.0 (SST-12).** Grupos Homogêneos de Exposição. Ver 3.5-bis. |
 | `nao_conformidades` | array `NaoConformidade` | ⬜ | Ver 3.8. |
 | `assinaturas` | array `Assinatura` | ✅ (≥1) | Exigida na finalização. Ver 3.10. |
 | `observacoes_gerais` | string | ⬜ | Texto livre. |
@@ -129,6 +130,17 @@ Um setor/ambiente/posto percorrido durante a vistoria. Agrupa as avaliações da
 | `id` | UUID v4 | ✅ | |
 | `nome` | string | ✅ | Ex.: "Operador de prensa". |
 | `quantidade` | inteiro ≥ 0 | ⬜ | Nº de funcionários naquela função no setor. |
+
+### 3.5-bis `GHE` (Grupo Homogêneo de Exposição) — schema 1.6.0 (SST-12)
+
+Grupo de funções que compartilham a mesma exposição. Referencia funções cadastradas nos setores (não duplica os dados).
+
+| Campo | Tipo | Obrigatório | Observações |
+|-------|------|:----------:|-------------|
+| `id` | UUID v4 | ✅ | |
+| `nome` | string | ✅ | Ex.: "GHE 01 — Produção". |
+| `descricao` | string | ⬜ | |
+| `funcoes_ref` | array de UUID | ⬜ | Ids de `FuncaoSetor` que compõem o grupo. Resolvidos por lookup nos setores. |
 
 ### 3.6 `AvaliacaoRisco`
 

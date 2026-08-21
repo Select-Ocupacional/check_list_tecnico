@@ -43,8 +43,11 @@
       <li class="passos__item" data-passo="riscos">
         <span class="passos__num">3</span> Riscos e EPIs
       </li>
+      <li class="passos__item" data-passo="ghe">
+        <span class="passos__num">4</span> GHE
+      </li>
       <li class="passos__item" data-passo="encerramento">
-        <span class="passos__num">4</span> Encerramento
+        <span class="passos__num">5</span> Encerramento
       </li>
     </ol>
   </nav>
@@ -298,7 +301,32 @@
       <p id="epi-vazio" class="lista-vazia">Nenhum EPI/EPC registrado neste setor.</p>
     </section>
 
-    <!-- ============ TELA 4 — ENCERRAMENTO E ASSINATURAS ============ -->
+    <!-- ============ TELA GHE — GRUPOS HOMOGÊNEOS DE EXPOSIÇÃO ============ -->
+    <section id="tela-ghe" class="tela" aria-labelledby="titulo-ghe" hidden>
+      <h2 id="titulo-ghe" class="tela__titulo">Grupos Homogêneos de Exposição (GHE)</h2>
+      <p class="tela__ajuda">Crie os GHEs e selecione, em cada um, as funções (cadastradas nos setores) que compartilham a mesma exposição.</p>
+
+      <form id="form-novo-ghe" class="setor-form" novalidate>
+        <div class="campo">
+          <label for="ghe_nome">Nome do GHE *</label>
+          <input type="text" id="ghe_nome" name="ghe_nome"
+                 placeholder="Ex.: GHE 01 — Produção" autocomplete="off" />
+          <small class="campo__erro" data-erro="ghe_nome"></small>
+        </div>
+        <div class="campo">
+          <label for="ghe_descricao">Descrição (opcional)</label>
+          <textarea id="ghe_descricao" name="ghe_descricao" rows="2"></textarea>
+        </div>
+        <button type="submit" class="btn btn--secundario btn--bloco">+ Adicionar GHE</button>
+      </form>
+
+      <p id="ghe-sem-funcoes" class="nota-norma" hidden>Nenhuma função cadastrada ainda — volte à etapa “Setores e funções” para cadastrar funções antes de compor os GHEs.</p>
+
+      <ul id="lista-ghe" class="lista-setores" aria-live="polite"></ul>
+      <p id="ghe-vazio" class="lista-vazia">Nenhum GHE cadastrado ainda.</p>
+    </section>
+
+    <!-- ============ TELA 5 — ENCERRAMENTO E ASSINATURAS ============ -->
     <section id="tela-encerramento" class="tela" aria-labelledby="titulo-encerramento" hidden>
       <h2 id="titulo-encerramento" class="tela__titulo">Encerramento da visita</h2>
       <p class="tela__ajuda">Registre o parecer técnico, os dados do responsável e colete as assinaturas para concluir.</p>

@@ -14,7 +14,7 @@ import {
 
 // Chave do rascunho único da versão anterior (localStorage) — usada só na migração.
 const CHAVE_STORAGE_ANTIGA = "select_visita_tecnica_rascunho";
-const VERSAO_SCHEMA = "1.5.0";
+const VERSAO_SCHEMA = "1.6.0";
 
 /** Gera um UUID v4 (usa crypto nativo quando disponível). */
 export function gerarUuid() {
@@ -48,6 +48,7 @@ export function criarVisitaVazia() {
     },
     tecnico: { id: "", nome: "", funcao: "", registro_profissional: "" },
     setores: [],
+    ghes: [],
     nao_conformidades: [],
     assinaturas: [],
     observacoes_gerais: "",
@@ -83,6 +84,52 @@ let _timerSalvar = null;
 export function agendarSalvamento() {
   clearTimeout(_timerSalvar);
   _timerSalvar = setTimeout(() => salvar(), 400);
+}
+
+/* ---------- Grupos Homogêneos de Exposição — GHE (SST-12) ---------- */
+
+/** Adiciona um GHE (grupo) e persiste. */
+export function adicionarGhe({ nome, descricao }) {
+  if (!Array.isArray(estado.visita.ghes)) estado.visita.ghes = [];
+  const ghe = { id: gerarUuid(), nome: nome.trim(), funcoes_ref: [] };
+  if (descricao && descricao.trim()) ghe.descricao = descricao.trim();
+  estado.visita.ghes.push(ghe);
+  salvar();
+  return ghe;
+}
+
+/** Remove um GHE pelo id e persiste. */
+export function removerGhe(id) {
+  estado.visita.ghes = (estado.visita.ghes || []).filter((g) => g.id !== id);
+  salvar();
+}
+
+/** Inclui/remove (toggle) a referência de uma função em um GHE. */
+export function alternarFuncaoNoGhe(gheId, funcaoId) {
+  const ghe = (estado.visita.ghes || []).find((g) => g.id === gheId);
+  if (!ghe) return;
+  if (!Array.isArray(ghe.funcoes_ref)) ghe.funcoes_ref = [];
+  const i = ghe.funcoes_ref.indexOf(funcaoId);
+  if (i >= 0) ghe.funcoes_ref.splice(i, 1);
+  else ghe.funcoes_ref.push(funcaoId);
+  salvar();
+}
+
+/** Lista todas as funções cadastradas nos setores (para compor GHEs). */
+export function listarFuncoesDisponiveis() {
+  const out = [];
+  (estado.visita.setores || []).forEach((setor) => {
+    (setor.funcoes || []).forEach((f) => {
+      out.push({
+        setorId: setor.id,
+        setorNome: setor.nome,
+        funcaoId: f.id,
+        funcaoNome: f.nome,
+        quantidade: f.quantidade,
+      });
+    });
+  });
+  return out;
 }
 
 /* ---------- Contatos do cliente (SST-06) ---------- */
