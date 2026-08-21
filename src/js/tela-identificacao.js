@@ -3,7 +3,7 @@
    Faz two-way binding simples, autosave e validação inline.
    ========================================================= */
 
-import { estado, salvar } from "./estado.js";
+import { estado, salvar, agendarSalvamento } from "./estado.js";
 import { validarIdentificacao, formatarCnpj, formatarCep, apenasDigitos } from "./validacao.js";
 
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
@@ -120,6 +120,12 @@ export function inicializarTelaIdentificacao() {
   const cep = $("#cep");
   cep?.addEventListener("input", () => { cep.value = formatarCep(cep.value); });
 
-  // Autosave em rascunho a cada alteração (offline-first).
-  form?.addEventListener("input", () => { coletarFormulario(); salvar(); });
+  // Autosave em rascunho a cada alteração (offline-first, com debounce).
+  form?.addEventListener("input", () => { coletarFormulario(); agendarSalvamento(); });
+}
+
+/** Recarrega o formulário a partir da visita atual e limpa erros. */
+export function preencherIdentificacao() {
+  preencherFormulario();
+  limparErros();
 }

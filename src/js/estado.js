@@ -1,10 +1,19 @@
 /* =========================================================
    estado.js — Modelo de dados em memória + persistência local.
    Alinhado ao contrato schema/checklist-visita-tecnica.schema.json (SST-01).
-   Princípio offline-first: tudo persiste em localStorage e nasce no dispositivo.
+   Princípio offline-first: persiste em IndexedDB (várias visitas) e nasce
+   no dispositivo. Migra automaticamente rascunhos antigos do localStorage.
    ========================================================= */
 
-const CHAVE_STORAGE = "select_visita_tecnica_rascunho";
+import {
+  salvarVisita as dbSalvar,
+  obterVisita as dbObter,
+  listarVisitas as dbListar,
+  excluirVisita as dbExcluir,
+} from "./db.js";
+
+// Chave do rascunho único da versão anterior (localStorage) — usada só na migração.
+const CHAVE_STORAGE_ANTIGA = "select_visita_tecnica_rascunho";
 const VERSAO_SCHEMA = "1.1.0";
 
 /** Gera um UUID v4 (usa crypto nativo quando disponível). */
@@ -52,33 +61,83 @@ export function criarVisitaVazia() {
   };
 }
 
-// Estado único da aplicação (a visita em edição).
+// Estado da aplicação: a visita atualmente em edição (ou null na tela inicial).
 export const estado = { visita: criarVisitaVazia() };
 
-/** Carrega rascunho salvo, se houver. Retorna true quando recuperou algo. */
-export function carregar() {
-  try {
-    const bruto = localStorage.getItem(CHAVE_STORAGE);
-    if (!bruto) return false;
-    const dados = JSON.parse(bruto);
-    if (dados && typeof dados === "object" && dados.id) {
-      estado.visita = dados;
-      return true;
-    }
-  } catch (e) {
-    console.warn("Não foi possível carregar o rascunho:", e);
-  }
-  return false;
-}
-
-/** Persiste a visita atual no armazenamento local (offline-first). */
-export function salvar() {
+/** Persiste a visita atual no IndexedDB (offline-first). Assíncrono. */
+export async function salvar() {
+  if (!estado.visita) return false;
   estado.visita.auditoria.atualizado_em = agoraIso();
   try {
-    localStorage.setItem(CHAVE_STORAGE, JSON.stringify(estado.visita));
+    await dbSalvar(estado.visita);
     return true;
   } catch (e) {
-    console.warn("Não foi possível salvar o rascunho:", e);
+    console.warn("Não foi possível salvar a visita:", e);
+    return false;
+  }
+}
+
+// Salvamento com debounce, para autosave de digitação (evita gravar a cada tecla).
+let _timerSalvar = null;
+/** Agenda um salvamento (debounce ~400ms). Ideal para eventos de digitação. */
+export function agendarSalvamento() {
+  clearTimeout(_timerSalvar);
+  _timerSalvar = setTimeout(() => salvar(), 400);
+}
+
+/* ---------- Gestão de múltiplas visitas ---------- */
+
+/** Cria uma nova visita, define como atual e persiste. */
+export async function novaVisita() {
+  estado.visita = criarVisitaVazia();
+  await salvar();
+  return estado.visita;
+}
+
+/** Abre uma visita salva pelo id e a define como atual. */
+export async function abrirVisita(id) {
+  const v = await dbObter(id);
+  if (v) estado.visita = v;
+  return v || null;
+}
+
+/** Lista as visitas salvas, mais recentes primeiro. */
+export async function listarVisitas() {
+  const visitas = await dbListar();
+  return (visitas || []).sort((a, b) =>
+    (b.auditoria?.atualizado_em || "").localeCompare(a.auditoria?.atualizado_em || "")
+  );
+}
+
+/** Exclui uma visita salva pelo id. */
+export async function excluirVisita(id) {
+  await dbExcluir(id);
+  if (estado.visita && estado.visita.id === id) estado.visita = null;
+}
+
+/**
+ * Migra o rascunho único da versão anterior (localStorage) para o IndexedDB.
+ * Executa uma vez; remove a chave antiga após migrar. Retorna true se migrou.
+ */
+export async function migrarLocalStorage() {
+  let bruto = null;
+  try {
+    bruto = localStorage.getItem(CHAVE_STORAGE_ANTIGA);
+  } catch {
+    return false;
+  }
+  if (!bruto) return false;
+  try {
+    const dados = JSON.parse(bruto);
+    if (dados && typeof dados === "object" && dados.id) {
+      if (!dados.auditoria) dados.auditoria = criarVisitaVazia().auditoria;
+      dados.auditoria.versao_schema = dados.auditoria.versao_schema || VERSAO_SCHEMA;
+      await dbSalvar(dados);
+    }
+    localStorage.removeItem(CHAVE_STORAGE_ANTIGA);
+    return true;
+  } catch (e) {
+    console.warn("Falha ao migrar rascunho do localStorage:", e);
     return false;
   }
 }

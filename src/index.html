@@ -21,6 +21,7 @@
 <body>
   <!-- Cabeçalho de marca (Navy) -->
   <header class="app-header">
+    <button id="btn-inicio" class="app-header__voltar" hidden aria-label="Voltar para minhas visitas">‹</button>
     <div class="app-header__marca">
       <span class="app-header__logo" aria-hidden="true">SO</span>
       <div>
@@ -28,11 +29,10 @@
         <p class="app-header__subtitulo">Select Ocupacional — SST</p>
       </div>
     </div>
-    <span id="indicador-rascunho" class="tag-rascunho" hidden>Rascunho salvo</span>
   </header>
 
   <!-- Indicador de etapas -->
-  <nav class="passos" aria-label="Progresso do check-list">
+  <nav id="passos" class="passos" aria-label="Progresso do check-list" hidden>
     <ol class="passos__lista">
       <li class="passos__item" data-passo="identificacao" aria-current="step">
         <span class="passos__num">1</span> Identificação
@@ -50,8 +50,19 @@
   </nav>
 
   <main class="conteudo">
+    <!-- ============ TELA INICIAL — LISTA DE VISITAS ============ -->
+    <section id="tela-inicio" class="tela" aria-labelledby="titulo-inicio" hidden>
+      <div class="inicio-cabecalho">
+        <h2 id="titulo-inicio" class="tela__titulo">Minhas visitas</h2>
+        <button id="btn-nova-visita-inicio" class="btn btn--primario">+ Nova visita</button>
+      </div>
+      <p class="tela__ajuda">Continue uma visita salva ou inicie uma nova. Tudo fica salvo neste dispositivo e funciona offline.</p>
+      <ul id="lista-visitas" class="lista-visitas" aria-live="polite"></ul>
+      <p id="visitas-vazio" class="lista-vazia">Nenhuma visita salva ainda. Toque em “Nova visita” para começar.</p>
+    </section>
+
     <!-- ============ TELA 1 — IDENTIFICAÇÃO ============ -->
-    <section id="tela-identificacao" class="tela" aria-labelledby="titulo-identificacao">
+    <section id="tela-identificacao" class="tela" aria-labelledby="titulo-identificacao" hidden>
       <h2 id="titulo-identificacao" class="tela__titulo">Identificação da visita</h2>
       <p class="tela__ajuda">Preencha os dados do cliente, da unidade visitada e do técnico responsável.</p>
 
@@ -356,7 +367,7 @@
   </main>
 
   <!-- Barra de navegação inferior (fixa, mobile-first) -->
-  <footer class="rodape-nav">
+  <footer id="rodape-nav" class="rodape-nav" hidden>
     <button type="button" id="btn-voltar" class="btn btn--fantasma" hidden>Voltar</button>
     <span class="rodape-nav__espaco"></span>
     <button type="button" id="btn-avancar" class="btn btn--primario">Avançar</button>

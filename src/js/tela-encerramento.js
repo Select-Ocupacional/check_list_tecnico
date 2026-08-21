@@ -6,7 +6,7 @@
 
 import {
   estado,
-  salvar,
+  agendarSalvamento,
   gerarUuid,
   registrarEncerramento,
   prepararParaValidacao,
@@ -38,9 +38,10 @@ export function inicializarTelaEncerramento() {
   // Autosave dos campos de texto do encerramento (offline-first).
   const form = $("#form-encerramento");
   form?.addEventListener("input", () => {
+    if (!estado.visita) return;
     estado.visita.observacoes_gerais = $("#parecer").value;
     if ($("#hora_fim").value) estado.visita.hora_fim = $("#hora_fim").value;
-    salvar();
+    agendarSalvamento();
   });
 
   // Ações do painel de sucesso.
@@ -61,6 +62,17 @@ export function renderizarTelaEncerramento() {
     v.hora_fim = v.hora_fim || horaAtual();
     $("#hora_fim").value = v.hora_fim;
   }
+}
+
+/** Restaura a tela para o estado inicial (ao abrir/nova visita). */
+export function resetarEncerramento() {
+  finalizada = false;
+  const form = $("#form-encerramento");
+  if (form) { form.hidden = false; form.reset(); }
+  $("#encerramento-sucesso").hidden = true;
+  padResponsavel?.limpar();
+  padTecnico?.limpar();
+  limparErros();
 }
 
 /* ---------- Finalização ---------- */
@@ -170,9 +182,8 @@ function baixarJson() {
 }
 
 function iniciarNovaVisita() {
-  if (!confirm("Iniciar uma nova visita? O rascunho atual será substituído.")) return;
-  try { localStorage.removeItem("select_visita_tecnica_rascunho"); } catch { /* ignora */ }
-  location.reload();
+  // A visita finalizada já está salva no IndexedDB; apenas inicia uma nova.
+  document.dispatchEvent(new CustomEvent("solicitar-nova-visita"));
 }
 
 /* ---------- Utilitários ---------- */

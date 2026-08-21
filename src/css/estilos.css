@@ -26,6 +26,10 @@
 
 * { box-sizing: border-box; }
 
+/* Garante que o atributo [hidden] esconda mesmo elementos com display definido
+   (ex.: .rodape-nav e .campo usam flex, que sobreporia o hidden do HTML). */
+[hidden] { display: none !important; }
+
 html, body {
   margin: 0;
   padding: 0;
@@ -407,6 +411,82 @@ input.invalido, select.invalido, textarea.invalido {
 }
 .rodape-nav__espaco { flex: 1; }
 .rodape-nav .btn { min-width: 120px; }
+
+/* --------- Cabeçalho: botão voltar (assistente) --------- */
+.app-header { justify-content: flex-start; }
+.app-header__voltar {
+  background: transparent;
+  border: 0;
+  color: var(--branco);
+  font-size: 1.9rem;
+  line-height: 1;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.app-header__voltar:hover { background: rgba(255,255,255,0.12); }
+
+/* --------- Tela inicial: lista de visitas --------- */
+.inicio-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.lista-visitas { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; }
+.visita-card {
+  display: flex;
+  align-items: stretch;
+  background: var(--branco);
+  border: 1px solid var(--cinza-borda);
+  border-radius: var(--raio);
+  overflow: hidden;
+}
+.visita-card__abrir {
+  flex: 1;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font: inherit;
+  color: var(--navy);
+  min-width: 0;
+}
+.visita-card__abrir:hover { background: var(--cinza-claro); }
+.visita-card__titulo { font-weight: 600; overflow-wrap: anywhere; }
+.visita-card__meta { font-size: 0.82rem; color: var(--cinza-medio); }
+.visita-card__excluir {
+  flex: 0 0 auto;
+  width: 52px;
+  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--cinza-borda);
+  color: var(--erro);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.visita-card__excluir:hover { background: var(--erro-fundo); }
+
+/* Badges de status */
+.badge {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-top: 2px;
+}
+.badge--rascunho { background: #FEF3C7; color: #92400E; }
+.badge--concluida { background: rgba(27,168,157,0.15); color: var(--teal-escuro); }
+.badge--sincronizada { background: #DBEAFE; color: #1E40AF; }
+.badge--cancelada { background: #F3F4F6; color: var(--cinza-medio); }
 
 /* --------- Responsivo: tablets e telas maiores --------- */
 @media (min-width: 600px) {
