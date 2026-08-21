@@ -214,6 +214,52 @@ input.invalido, select.invalido, textarea.invalido {
 .setor-card__remover:hover { background: var(--erro-fundo); border-color: var(--erro); }
 .lista-vazia { color: var(--cinza-medio); font-size: 0.9rem; text-align: center; padding: 18px; }
 
+/* --------- Setor com funções (Tela 2) --------- */
+.setor-item {
+  background: var(--branco);
+  border: 1px solid var(--cinza-borda);
+  border-left: 4px solid var(--teal);
+  border-radius: var(--raio);
+  padding: 12px 14px;
+}
+.setor-item__topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.setor-funcoes {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--cinza-borda);
+}
+.funcoes-lista { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 8px; }
+.funcoes-vazio { color: var(--cinza-medio); font-size: 0.85rem; }
+.funcao-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--cinza-claro);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+.funcao-row__nome { flex: 1; font-size: 0.92rem; overflow-wrap: anywhere; }
+.funcao-row__qtd { width: 72px; min-height: 40px; text-align: center; padding: 0 6px; }
+.funcao-row__remover {
+  flex: 0 0 auto;
+  width: 36px; min-height: 36px;
+  background: transparent;
+  border: 1px solid var(--cinza-borda);
+  color: var(--erro);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.funcao-row__remover:hover { background: var(--erro-fundo); }
+.funcao-form { display: flex; gap: 8px; margin-top: 8px; }
+.funcao-form__nome { flex: 1; }
+.funcao-form__qtd { width: 72px; text-align: center; }
+.funcao-form__add { flex: 0 0 auto; width: 48px; padding: 0; font-size: 1.3rem; }
+
 /* --------- Tela 3: subtítulos e seletor de setor --------- */
 .subtitulo {
   font-size: 1rem;

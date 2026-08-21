@@ -38,6 +38,10 @@
       "id": "a1b2c3d4-1111-4a22-8b33-445566778899",
       "nome": "Producao - Linha de Corte",
       "descricao": "Setor de corte e conformacao de chapas metalicas.",
+      "funcoes": [
+        { "id": "f1a2b3c4-1111-4a22-8b33-445566778911", "nome": "Operador de prensa", "quantidade": 5 },
+        { "id": "f1a2b3c4-2222-4a22-8b33-445566778912", "nome": "Auxiliar de producao", "quantidade": 3 }
+      ],
       "avaliacoes_risco": [
         {
           "id": "b2c3d4e5-2222-4a22-8b33-445566778800",
@@ -135,6 +139,6 @@
     "sincronizado_em": null,
     "dispositivo_id": "tablet-tecnico-07",
     "versao_app": "1.0.0",
-    "versao_schema": "1.2.0"
+    "versao_schema": "1.3.0"
   }
 }

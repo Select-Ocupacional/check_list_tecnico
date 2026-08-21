@@ -14,7 +14,7 @@ import {
 
 // Chave do rascunho único da versão anterior (localStorage) — usada só na migração.
 const CHAVE_STORAGE_ANTIGA = "select_visita_tecnica_rascunho";
-const VERSAO_SCHEMA = "1.2.0";
+const VERSAO_SCHEMA = "1.3.0";
 
 /** Gera um UUID v4 (usa crypto nativo quando disponível). */
 export function gerarUuid() {
@@ -150,6 +150,7 @@ export function adicionarSetor({ nome, descricao }) {
     id: gerarUuid(),
     nome: nome.trim(),
     descricao: (descricao || "").trim(),
+    funcoes: [],
     avaliacoes_risco: [],
     verificacoes_epi_epc: [],
   };
@@ -162,6 +163,44 @@ export function adicionarSetor({ nome, descricao }) {
 /** Remove um setor pelo id e persiste. */
 export function removerSetor(id) {
   estado.visita.setores = estado.visita.setores.filter((s) => s.id !== id);
+  salvar();
+}
+
+/* ---------- Funções do setor (SST-08) ---------- */
+
+/** Adiciona uma função (com quantidade opcional) a um setor. */
+export function adicionarFuncao(setorId, { nome, quantidade }) {
+  const setor = obterSetor(setorId);
+  if (!setor) return null;
+  if (!Array.isArray(setor.funcoes)) setor.funcoes = [];
+  const funcao = { id: gerarUuid(), nome: nome.trim() };
+  const qtd = Number(quantidade);
+  if (Number.isFinite(qtd) && qtd >= 0 && String(quantidade).trim() !== "") {
+    funcao.quantidade = qtd;
+  }
+  setor.funcoes.push(funcao);
+  salvar();
+  return funcao;
+}
+
+/** Atualiza uma função do setor (ex.: quantidade) e persiste. */
+export function atualizarFuncao(setorId, funcaoId, patch) {
+  const setor = obterSetor(setorId);
+  const funcao = setor?.funcoes?.find((f) => f.id === funcaoId);
+  if (!funcao) return null;
+  Object.assign(funcao, patch);
+  if (funcao.quantidade === null || funcao.quantidade === undefined || Number.isNaN(funcao.quantidade)) {
+    delete funcao.quantidade;
+  }
+  salvar();
+  return funcao;
+}
+
+/** Remove uma função de um setor e persiste. */
+export function removerFuncao(setorId, funcaoId) {
+  const setor = obterSetor(setorId);
+  if (!setor?.funcoes) return;
+  setor.funcoes = setor.funcoes.filter((f) => f.id !== funcaoId);
   salvar();
 }
 

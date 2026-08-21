@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://select-ocupacional.com.br/schemas/checklist-visita-tecnica/1.2.0.json",
+  "$id": "https://select-ocupacional.com.br/schemas/checklist-visita-tecnica/1.3.0.json",
   "title": "Check-list de Visita Técnica (SST)",
   "description": "Contrato de dados da Visita Técnica de SST da Select Ocupacional. Fonte única de validação de integridade (SST-01).",
   "type": "object",
-  "$comment": "versao_schema: 1.2.0. Historico: 1.1.0 removeu CPF da assinatura (SST-04-ajuste); 1.2.0 removeu 'conforme' da avaliacao de risco (SST-09) e acrescentou 'avaliar' ao nivel de exposicao (SST-10).",
+  "$comment": "versao_schema: 1.3.0. Historico: 1.1.0 removeu CPF da assinatura (SST-04-ajuste); 1.2.0 removeu 'conforme' do risco (SST-09) e acrescentou 'avaliar' ao nivel de exposicao (SST-10); 1.3.0 acrescentou 'funcoes' (nome + quantidade) ao setor (SST-08).",
   "required": [
     "id",
     "status",
@@ -113,6 +113,11 @@
         "id": { "$ref": "#/$defs/uuid" },
         "nome": { "type": "string", "minLength": 1 },
         "descricao": { "type": "string" },
+        "funcoes": {
+          "type": "array",
+          "$comment": "1.3.0 (SST-08): funcoes do setor com quantidade de funcionarios por funcao.",
+          "items": { "$ref": "#/$defs/funcaoSetor" }
+        },
         "avaliacoes_risco": {
           "type": "array",
           "items": { "$ref": "#/$defs/avaliacaoRisco" }
@@ -121,6 +126,16 @@
           "type": "array",
           "items": { "$ref": "#/$defs/verificacaoEpiEpc" }
         }
+      }
+    },
+    "funcaoSetor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "nome"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "nome": { "type": "string", "minLength": 1 },
+        "quantidade": { "type": "integer", "minimum": 0 }
       }
     },
     "avaliacaoRisco": {

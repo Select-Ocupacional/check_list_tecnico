@@ -109,8 +109,17 @@ Um setor/ambiente/posto percorrido durante a vistoria. Agrupa as avaliações da
 | `id` | UUID v4 | ✅ | |
 | `nome` | string | ✅ | Ex.: "Produção — Linha 2", "Almoxarifado". |
 | `descricao` | string | ⬜ | |
+| `funcoes` | array `FuncaoSetor` | ⬜ | **schema 1.3.0 (SST-08).** Funções do setor com nº de funcionários. Base para o GHE (SST-12). |
 | `avaliacoes_risco` | array `AvaliacaoRisco` | ⬜ | Ver 3.6. |
 | `verificacoes_epi_epc` | array `VerificacaoEpiEpc` | ⬜ | Ver 3.7. |
+
+#### `FuncaoSetor` (schema 1.3.0)
+
+| Campo | Tipo | Obrigatório | Observações |
+|-------|------|:----------:|-------------|
+| `id` | UUID v4 | ✅ | |
+| `nome` | string | ✅ | Ex.: "Operador de prensa". |
+| `quantidade` | inteiro ≥ 0 | ⬜ | Nº de funcionários naquela função no setor. |
 
 ### 3.6 `AvaliacaoRisco`
 
