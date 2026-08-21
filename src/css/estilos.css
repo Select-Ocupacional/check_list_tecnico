@@ -606,6 +606,17 @@ input.invalido, select.invalido, textarea.invalido {
 .usuario-bar__email { font-size: 0.85rem; color: var(--cinza-medio); overflow-wrap: anywhere; }
 .usuario-bar .btn { min-height: 40px; padding: 0 14px; }
 
+/* Barra de sincronização */
+.sync-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.sync-bar__status { font-size: 0.85rem; color: var(--cinza-medio); overflow-wrap: anywhere; }
+.sync-bar .btn { min-height: 40px; padding: 0 14px; flex: 0 0 auto; }
+
 /* --------- Cabeçalho: botão voltar (assistente) --------- */
 .app-header { justify-content: flex-start; }
 .app-header__voltar {

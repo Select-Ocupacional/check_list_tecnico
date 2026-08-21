@@ -47,6 +47,7 @@ import {
   cadastrar,
   sair,
 } from "./auth.js";
+import { sincronizar, contarPendentes, excluirVisitaRemota } from "./sync.js";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -126,7 +127,9 @@ async function renderizarListaVisitas() {
       e.stopPropagation();
       if (confirm("Excluir esta visita? Esta ação não pode ser desfeita.")) {
         await excluirVisita(v.id);
+        excluirVisitaRemota(v.id); // best-effort no servidor
         renderizarListaVisitas();
+        atualizarStatusSync();
       }
     });
 
@@ -135,9 +138,40 @@ async function renderizarListaVisitas() {
   });
 }
 
+/* ---------- Sincronização (SST-BE-3) ---------- */
+
+let sincronizando = false;
+
+async function atualizarStatusSync() {
+  const el = $("#sync-status");
+  if (!el) return;
+  if (!navigator.onLine) {
+    el.textContent = "Offline — as alterações serão enviadas ao reconectar.";
+    return;
+  }
+  const n = await contarPendentes();
+  el.textContent = n === 0 ? "Tudo sincronizado." : `${n} visita(s) pendente(s) de envio.`;
+}
+
+async function sincronizarAgora() {
+  if (sincronizando) return;
+  sincronizando = true;
+  const btn = $("#btn-sincronizar");
+  if (btn) { btn.disabled = true; btn.textContent = "Sincronizando…"; }
+  try {
+    const r = await sincronizar();
+    if (r.enviadas || r.baixadas) await renderizarListaVisitas();
+  } finally {
+    sincronizando = false;
+    if (btn) { btn.disabled = false; btn.textContent = "Sincronizar"; }
+    await atualizarStatusSync();
+  }
+}
+
 /** Exibe a tela inicial e esconde o assistente. */
 async function mostrarInicio() {
   await renderizarListaVisitas();
+  await atualizarStatusSync();
   $("#tela-inicio").hidden = false;
   PASSOS.forEach((t) => ($("#tela-" + t).hidden = true));
   $("#passos").hidden = true;
@@ -213,6 +247,7 @@ async function entrarApp() {
   if (u) $("#usuario-email").textContent = u.email || "";
   await migrarLocalStorage();
   await mostrarInicio();
+  sincronizarAgora(); // sincroniza em segundo plano ao entrar
 }
 
 function inicializarLogin() {
@@ -284,6 +319,7 @@ async function inicializar() {
       if (finalizarVisita()) {
         btnAvancar.hidden = true;
         btnVoltar.hidden = true;
+        sincronizarAgora(); // envia a visita concluída
       }
       return;
     }
@@ -293,11 +329,19 @@ async function inicializar() {
 
   btnVoltar.addEventListener("click", () => irPara(indiceAtual - 1));
 
-  // Voltar à lista de visitas (salva o que estiver aberto).
+  // Voltar à lista de visitas (salva o que estiver aberto e sincroniza).
   btnInicio.addEventListener("click", async () => {
     await salvar();
-    mostrarInicio();
+    await mostrarInicio();
+    sincronizarAgora();
   });
+
+  // Sincronização manual.
+  $("#btn-sincronizar").addEventListener("click", () => sincronizarAgora());
+
+  // Sincroniza automaticamente ao reconectar.
+  window.addEventListener("online", () => sincronizarAgora());
+  window.addEventListener("offline", () => atualizarStatusSync());
 
   // Nova visita a partir da tela inicial.
   $("#btn-nova-visita-inicio").addEventListener("click", async () => {
