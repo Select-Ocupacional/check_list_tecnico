@@ -5,6 +5,7 @@
    ========================================================= */
 
 import { formatarCnpj, formatarCep } from "./validacao.js";
+import { resolverRef } from "./storage.js";
 
 const NIVEL = {
   nao_avaliado: "Não avaliado", baixo: "Baixo", medio: "Médio", alto: "Alto", avaliar: "Avaliar",
@@ -203,11 +204,27 @@ function montarHtml(v) {
  * Gera o relatório de uma visita e abre o diálogo de impressão
  * (o usuário escolhe "Salvar como PDF").
  */
-export function gerarRelatorio(visita) {
+export async function gerarRelatorio(visita) {
   if (!visita) return;
   const container = document.getElementById("relatorio-container");
   if (!container) return;
-  container.innerHTML = montarHtml(visita);
-  // Aguarda o layout (e a decodificação das imagens de assinatura) antes de imprimir.
-  setTimeout(() => window.print(), 150);
+
+  // Clona e resolve os binários (data URL, cache local ou URL assinada).
+  const v = typeof structuredClone === "function"
+    ? structuredClone(visita)
+    : JSON.parse(JSON.stringify(visita));
+  for (const s of v.setores || []) {
+    for (const r of s.avaliacoes_risco || []) {
+      for (const ev of r.evidencias || []) {
+        ev.arquivo_ref = await resolverRef(ev.arquivo_ref);
+      }
+    }
+  }
+  for (const a of v.assinaturas || []) {
+    a.assinatura_ref = await resolverRef(a.assinatura_ref);
+  }
+
+  container.innerHTML = montarHtml(v);
+  // Aguarda o layout e a decodificação das imagens antes de imprimir.
+  setTimeout(() => window.print(), 300);
 }

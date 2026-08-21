@@ -7,12 +7,13 @@
    ========================================================= */
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
-import { tokenAcesso } from "./auth.js";
+import { tokenAcesso, usuarioAtual } from "./auth.js";
 import {
   listarVisitas as dbListar,
   obterVisita as dbObter,
   salvarVisita as dbSalvar,
 } from "./db.js";
+import { uploadBinario, ehDataUrl } from "./storage.js";
 
 const REST = `${SUPABASE_URL}/rest/v1`;
 
@@ -38,8 +39,38 @@ export async function contarPendentes() {
   return (vs || []).filter(pendente).length;
 }
 
+/**
+ * Migra os binários (fotos/assinaturas) que ainda são data URL para o Storage,
+ * substituindo o ref pelo caminho. Mantém o data URL em cache local (offline).
+ */
+async function subirBinarios(v) {
+  const uid = usuarioAtual()?.id;
+  if (!uid) return;
+
+  for (const setor of v.setores || []) {
+    for (const risco of setor.avaliacoes_risco || []) {
+      for (const ev of risco.evidencias || []) {
+        if (ehDataUrl(ev.arquivo_ref)) {
+          const path = `${uid}/${v.id}/evidencias/${ev.id}.jpg`;
+          await uploadBinario(path, ev.arquivo_ref);
+          ev.arquivo_ref = path;
+        }
+      }
+    }
+  }
+
+  for (const a of v.assinaturas || []) {
+    if (ehDataUrl(a.assinatura_ref)) {
+      const path = `${uid}/${v.id}/assinaturas/${a.id}.png`;
+      await uploadBinario(path, a.assinatura_ref);
+      a.assinatura_ref = path;
+    }
+  }
+}
+
 /** Envia (upsert) uma visita ao servidor e marca como sincronizada localmente. */
 async function enviarVisita(v) {
+  await subirBinarios(v); // fotos/assinaturas vão para o Storage; ref vira caminho
   v.auditoria.sincronizado_em = v.auditoria.atualizado_em; // registra antes de enviar
   const linha = {
     id: v.id,

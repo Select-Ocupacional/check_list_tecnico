@@ -18,6 +18,7 @@ import {
 } from "./estado.js";
 import { GRUPOS, CATALOGO_RISCOS } from "./catalogo-riscos.js";
 import { comprimirImagem } from "./imagem.js";
+import { resolverRef } from "./storage.js";
 
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
 
@@ -169,9 +170,9 @@ function construirEvidencias(risco) {
       fig.className = "risco-foto";
 
       const img = document.createElement("img");
-      img.src = ev.arquivo_ref;
       img.alt = ev.legenda || "Evidência";
       img.loading = "lazy";
+      resolverRef(ev.arquivo_ref).then((url) => { if (url) img.src = url; });
 
       const legenda = document.createElement("input");
       legenda.type = "text";
