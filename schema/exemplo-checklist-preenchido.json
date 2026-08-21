@@ -10,8 +10,10 @@
     "nome_fantasia": "MetalEx",
     "cnpj": "12345678000199",
     "codigo_cliente_erp": "CLI-0087",
-    "contato_nome": "Joao Pereira",
-    "contato_telefone": "19999990000"
+    "contatos": [
+      { "id": "c0a1b2c3-1111-4a22-8b33-445566778901", "nome": "Joao Pereira", "email": "joao.pereira@metalex.com.br", "departamento": "SST", "telefone": "19999990000" },
+      { "id": "c0a1b2c3-2222-4a22-8b33-445566778902", "nome": "Ana Lima", "departamento": "RH" }
+    ]
   },
   "unidade": {
     "nome": "Planta Industrial - Santa Barbara d Oeste",
@@ -140,6 +142,6 @@
     "sincronizado_em": null,
     "dispositivo_id": "tablet-tecnico-07",
     "versao_app": "1.0.0",
-    "versao_schema": "1.4.0"
+    "versao_schema": "1.5.0"
   }
 }

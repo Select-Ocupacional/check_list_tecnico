@@ -3,7 +3,13 @@
    Faz two-way binding simples, autosave e validação inline.
    ========================================================= */
 
-import { estado, salvar, agendarSalvamento } from "./estado.js";
+import {
+  estado,
+  salvar,
+  agendarSalvamento,
+  adicionarContato,
+  removerContato,
+} from "./estado.js";
 import { validarIdentificacao, formatarCnpj, formatarCep, apenasDigitos } from "./validacao.js";
 
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
@@ -18,8 +24,7 @@ function preencherFormulario() {
   set("razao_social", v.cliente.razao_social);
   set("nome_fantasia", v.cliente.nome_fantasia);
   set("cnpj", v.cliente.cnpj ? formatarCnpj(v.cliente.cnpj) : "");
-  set("contato_nome", v.cliente.contato_nome);
-  set("contato_telefone", v.cliente.contato_telefone);
+  renderizarContatos();
   set("unidade_nome", v.unidade.nome);
   set("logradouro", v.unidade.endereco.logradouro);
   set("numero", v.unidade.endereco.numero);
@@ -45,8 +50,7 @@ function coletarFormulario() {
   v.cliente.razao_social = val("razao_social");
   v.cliente.nome_fantasia = val("nome_fantasia");
   v.cliente.cnpj = apenasDigitos(val("cnpj")); // schema exige 14 dígitos crus
-  v.cliente.contato_nome = val("contato_nome");
-  v.cliente.contato_telefone = val("contato_telefone");
+  // contatos são gerenciados à parte (lista dinâmica).
 
   v.unidade.nome = val("unidade_nome");
   v.unidade.endereco.logradouro = val("logradouro");
@@ -65,6 +69,81 @@ function coletarFormulario() {
   v.tecnico.nome = val("tecnico_nome");
   v.tecnico.funcao = val("tecnico_funcao");
   v.tecnico.registro_profissional = val("tecnico_registro");
+}
+
+/** Renderiza a lista de contatos do cliente a partir do estado. */
+function renderizarContatos() {
+  const lista = $("#lista-contatos");
+  const vazio = $("#contatos-vazio");
+  if (!lista) return;
+  const contatos = estado.visita.cliente.contatos || [];
+  lista.innerHTML = "";
+  if (vazio) vazio.hidden = contatos.length > 0;
+
+  contatos.forEach((contato) => {
+    const li = document.createElement("li");
+    li.className = "contato-card";
+
+    const info = document.createElement("div");
+    info.className = "contato-card__info";
+    const nome = document.createElement("p");
+    nome.className = "contato-card__nome";
+    nome.textContent = contato.nome;
+    info.appendChild(nome);
+
+    const detalhes = [contato.departamento, contato.email, contato.telefone].filter(Boolean);
+    if (detalhes.length) {
+      const meta = document.createElement("p");
+      meta.className = "contato-card__meta";
+      meta.textContent = detalhes.join(" · ");
+      info.appendChild(meta);
+    }
+
+    const remover = document.createElement("button");
+    remover.type = "button";
+    remover.className = "setor-card__remover";
+    remover.setAttribute("aria-label", `Remover contato ${contato.nome}`);
+    remover.textContent = "✕";
+    remover.addEventListener("click", () => {
+      removerContato(contato.id);
+      renderizarContatos();
+    });
+
+    li.append(info, remover);
+    lista.appendChild(li);
+  });
+}
+
+/** Lê os campos de novo contato, valida e adiciona. */
+function tratarAdicionarContato() {
+  const nome = $("#novo_contato_nome").value.trim();
+  const email = $("#novo_contato_email").value.trim();
+  const erro = $('[data-erro="novo_contato"]');
+  if (erro) erro.textContent = "";
+
+  if (!nome) {
+    if (erro) erro.textContent = "Informe ao menos o nome do contato.";
+    $("#novo_contato_nome").focus();
+    return;
+  }
+  // Validação simples de e-mail (quando preenchido).
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (erro) erro.textContent = "E-mail inválido.";
+    $("#novo_contato_email").focus();
+    return;
+  }
+
+  adicionarContato({
+    nome,
+    email,
+    departamento: $("#novo_contato_departamento").value,
+    telefone: $("#novo_contato_telefone").value,
+  });
+
+  ["novo_contato_nome", "novo_contato_email", "novo_contato_departamento", "novo_contato_telefone"]
+    .forEach((id) => ($("#" + id).value = ""));
+  renderizarContatos();
+  $("#novo_contato_nome").focus();
 }
 
 /** Limpa marcações de erro da tela. */
@@ -108,6 +187,9 @@ export function inicializarTelaIdentificacao() {
 
   const form = $("#form-identificacao");
 
+  // Evita que Enter em um campo submeta/recarregue a página (a navegação é pelo rodapé).
+  form?.addEventListener("submit", (ev) => ev.preventDefault());
+
   // Máscara viva de CNPJ.
   const cnpj = $("#cnpj");
   cnpj?.addEventListener("input", () => { cnpj.value = formatarCnpj(cnpj.value); });
@@ -119,6 +201,9 @@ export function inicializarTelaIdentificacao() {
   // Máscara viva de CEP.
   const cep = $("#cep");
   cep?.addEventListener("input", () => { cep.value = formatarCep(cep.value); });
+
+  // Adicionar contato (botão dedicado — não é submit, para não enviar o form).
+  $("#btn-add-contato")?.addEventListener("click", tratarAdicionarContato);
 
   // Autosave em rascunho a cada alteração (offline-first, com debounce).
   form?.addEventListener("input", () => { coletarFormulario(); agendarSalvamento(); });

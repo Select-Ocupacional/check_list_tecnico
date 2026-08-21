@@ -14,7 +14,7 @@ import {
 
 // Chave do rascunho único da versão anterior (localStorage) — usada só na migração.
 const CHAVE_STORAGE_ANTIGA = "select_visita_tecnica_rascunho";
-const VERSAO_SCHEMA = "1.4.0";
+const VERSAO_SCHEMA = "1.5.0";
 
 /** Gera um UUID v4 (usa crypto nativo quando disponível). */
 export function gerarUuid() {
@@ -39,7 +39,7 @@ export function criarVisitaVazia() {
     status: "rascunho",
     data_visita: "",
     hora_inicio: "",
-    cliente: { razao_social: "", nome_fantasia: "", cnpj: "", contato_nome: "", contato_telefone: "" },
+    cliente: { razao_social: "", nome_fantasia: "", cnpj: "", contatos: [] },
     unidade: {
       nome: "",
       endereco: { logradouro: "", numero: "", bairro: "", municipio: "", uf: "", cep: "" },
@@ -83,6 +83,29 @@ let _timerSalvar = null;
 export function agendarSalvamento() {
   clearTimeout(_timerSalvar);
   _timerSalvar = setTimeout(() => salvar(), 400);
+}
+
+/* ---------- Contatos do cliente (SST-06) ---------- */
+
+/** Adiciona um contato ao cliente e persiste. */
+export function adicionarContato({ nome, email, departamento, telefone }) {
+  const c = estado.visita.cliente;
+  if (!Array.isArray(c.contatos)) c.contatos = [];
+  const contato = { id: gerarUuid(), nome: nome.trim() };
+  if (email && email.trim()) contato.email = email.trim();
+  if (departamento && departamento.trim()) contato.departamento = departamento.trim();
+  if (telefone && telefone.trim()) contato.telefone = telefone.trim();
+  c.contatos.push(contato);
+  salvar();
+  return contato;
+}
+
+/** Remove um contato do cliente pelo id e persiste. */
+export function removerContato(id) {
+  const c = estado.visita.cliente;
+  if (!c.contatos) return;
+  c.contatos = c.contatos.filter((x) => x.id !== id);
+  salvar();
 }
 
 /* ---------- Gestão de múltiplas visitas ---------- */

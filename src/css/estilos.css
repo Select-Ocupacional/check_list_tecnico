@@ -175,6 +175,22 @@ input.invalido, select.invalido, textarea.invalido {
 .campo-linha { display: flex; flex-direction: column; gap: 12px; }
 .campo-linha .campo { margin-bottom: 0; }
 
+/* Contatos do cliente (Tela 1) */
+.contatos-lista { list-style: none; margin: 6px 0; padding: 0; display: grid; gap: 8px; }
+.contato-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--cinza-claro);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.contato-card__info { min-width: 0; }
+.contato-card__nome { font-weight: 600; margin: 0; overflow-wrap: anywhere; }
+.contato-card__meta { font-size: 0.82rem; color: var(--cinza-medio); margin: 2px 0 0; overflow-wrap: anywhere; }
+.contato-form { display: grid; gap: 8px; margin-top: 8px; }
+
 .nota-norma { font-size: 0.75rem; color: var(--cinza-medio); margin: 4px 2px 0; }
 .nota-norma em { color: var(--teal-escuro); font-style: normal; font-weight: 600; }
 

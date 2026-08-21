@@ -78,8 +78,17 @@ erDiagram
 | `nome_fantasia` | string | ⬜ | |
 | `cnpj` | string (14 díg.) | ✅ | Validar dígito verificador no app. |
 | `codigo_cliente_erp` | string | ⬜ | `[VERIFICAR CÓDIGO NO GESTÃO CLICK]` quando aplicável. |
-| `contato_nome` | string | ⬜ | |
-| `contato_telefone` | string | ⬜ | |
+| `contatos` | array `Contato` | ⬜ | **schema 1.5.0 (SST-06).** Múltiplos contatos. Substituiu `contato_nome`/`contato_telefone`. |
+
+#### `Contato` (schema 1.5.0)
+
+| Campo | Tipo | Obrigatório | Observações |
+|-------|------|:----------:|-------------|
+| `id` | UUID v4 | ✅ | |
+| `nome` | string | ✅ | |
+| `email` | string (email) | ⬜ | Validado (formato) no app. |
+| `departamento` | string | ⬜ | Departamento/função do contato. |
+| `telefone` | string | ⬜ | |
 
 ### 3.3 `Unidade`
 

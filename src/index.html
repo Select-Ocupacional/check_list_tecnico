@@ -102,14 +102,17 @@
               <small class="campo__erro" data-erro="cnpj"></small>
             </div>
           </div>
-          <div class="campo-linha">
-            <div class="campo">
-              <label for="contato_nome">Contato no cliente</label>
-              <input type="text" id="contato_nome" name="contato_nome" autocomplete="off" />
-            </div>
-            <div class="campo">
-              <label for="contato_telefone">Telefone do contato</label>
-              <input type="tel" id="contato_telefone" name="contato_telefone" inputmode="tel" />
+          <div class="campo">
+            <span class="rotulo-grupo">Contatos no cliente</span>
+            <ul id="lista-contatos" class="contatos-lista" aria-live="polite"></ul>
+            <p id="contatos-vazio" class="funcoes-vazio">Nenhum contato adicionado.</p>
+            <div class="contato-form">
+              <input type="text" id="novo_contato_nome" placeholder="Nome" autocomplete="off" aria-label="Nome do contato" />
+              <input type="email" id="novo_contato_email" placeholder="E-mail" autocomplete="off" aria-label="E-mail do contato" />
+              <input type="text" id="novo_contato_departamento" placeholder="Departamento / função" autocomplete="off" aria-label="Departamento ou função do contato" />
+              <input type="tel" id="novo_contato_telefone" placeholder="Telefone" inputmode="tel" autocomplete="off" aria-label="Telefone do contato" />
+              <button type="button" id="btn-add-contato" class="btn btn--secundario btn--bloco">+ Adicionar contato</button>
+              <small class="campo__erro" data-erro="novo_contato"></small>
             </div>
           </div>
         </fieldset>
