@@ -170,6 +170,8 @@ input.invalido, select.invalido, textarea.invalido {
   background: var(--erro-fundo);
 }
 .campo__erro { color: var(--erro); font-size: 0.78rem; margin-top: 5px; min-height: 1em; }
+/* Dica informativa (não é erro) */
+#cnae-dica { color: var(--cinza-medio); }
 
 /* Linhas responsivas: empilham no celular, lado a lado no maior */
 .campo-linha { display: flex; flex-direction: column; gap: 12px; }

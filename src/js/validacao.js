@@ -80,6 +80,14 @@ export function validarSetores(visita) {
   return erros;
 }
 
+/** Formata CNAE (subclasse) para exibição: 0000-0/00. */
+export function formatarCnae(valor) {
+  const c = apenasDigitos(valor).slice(0, 7);
+  return c
+    .replace(/^(\d{4})(\d)/, "$1-$2")
+    .replace(/^(\d{4})-(\d)(\d)/, "$1-$2/$3");
+}
+
 /** Formata CEP para exibição: 00000-000. */
 export function formatarCep(valor) {
   const c = apenasDigitos(valor).slice(0, 8);

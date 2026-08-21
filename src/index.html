@@ -168,6 +168,12 @@
             </div>
           </div>
           <div class="campo-linha">
+            <div class="campo">
+              <label for="cnae_principal">CNAE principal</label>
+              <input type="text" id="cnae_principal" name="cnae_principal" inputmode="numeric"
+                     maxlength="9" placeholder="0000-0/00" autocomplete="off" />
+              <small id="cnae-dica" class="campo__erro"></small>
+            </div>
             <div class="campo campo--pequeno">
               <label for="grau_risco">Grau de risco</label>
               <select id="grau_risco" name="grau_risco">
@@ -184,7 +190,7 @@
                      min="0" inputmode="numeric" />
             </div>
           </div>
-          <p class="nota-norma">Grau de risco conforme NR-04/CNAE. <em>[VERIFICAR VIGÊNCIA DA NORMA]</em></p>
+          <p class="nota-norma">O grau de risco é preenchido automaticamente pelo CNAE (Quadro I da NR-04) quando disponível na tabela; ajuste manualmente se necessário. <em>[VERIFICAR VIGÊNCIA DA NORMA]</em></p>
         </fieldset>
 
         <fieldset class="grupo">

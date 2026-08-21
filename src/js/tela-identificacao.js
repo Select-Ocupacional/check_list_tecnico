@@ -10,7 +10,8 @@ import {
   adicionarContato,
   removerContato,
 } from "./estado.js";
-import { validarIdentificacao, formatarCnpj, formatarCep, apenasDigitos } from "./validacao.js";
+import { validarIdentificacao, formatarCnpj, formatarCep, formatarCnae, apenasDigitos } from "./validacao.js";
+import { grauPorCnae } from "./tabela-cnae-nr04.js";
 
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
 
@@ -32,6 +33,7 @@ function preencherFormulario() {
   set("cep", v.unidade.endereco.cep ? formatarCep(v.unidade.endereco.cep) : "");
   set("municipio", v.unidade.endereco.municipio);
   set("uf", v.unidade.endereco.uf);
+  set("cnae_principal", v.unidade.cnae_principal ? formatarCnae(v.unidade.cnae_principal) : "");
   set("grau_risco", v.unidade.grau_risco ?? "");
   set("numero_trabalhadores", v.unidade.numero_trabalhadores ?? "");
   set("tecnico_nome", v.tecnico.nome);
@@ -59,6 +61,7 @@ function coletarFormulario() {
   v.unidade.endereco.cep = apenasDigitos(val("cep")); // schema exige 8 dígitos; vazio é sanitizado
   v.unidade.endereco.municipio = val("municipio");
   v.unidade.endereco.uf = val("uf").toUpperCase();
+  v.unidade.cnae_principal = val("cnae_principal");
 
   const grau = val("grau_risco");
   v.unidade.grau_risco = grau ? Number(grau) : null;
@@ -201,6 +204,23 @@ export function inicializarTelaIdentificacao() {
   // Máscara viva de CEP.
   const cep = $("#cep");
   cep?.addEventListener("input", () => { cep.value = formatarCep(cep.value); });
+
+  // CNAE: máscara + preenchimento automático do grau de risco (Quadro I da NR-04).
+  const cnae = $("#cnae_principal");
+  const dica = $("#cnae-dica");
+  cnae?.addEventListener("input", () => {
+    cnae.value = formatarCnae(cnae.value);
+    const grau = grauPorCnae(cnae.value);
+    if (grau) {
+      const sel = $("#grau_risco");
+      if (sel) sel.value = String(grau);
+      if (dica) dica.textContent = `Grau ${grau} preenchido pela tabela NR-04 (verificar vigência). Ajuste se necessário.`;
+    } else if (apenasDigitos(cnae.value).length === 7) {
+      if (dica) dica.textContent = "CNAE não encontrado na tabela — informe o grau manualmente.";
+    } else if (dica) {
+      dica.textContent = "";
+    }
+  });
 
   // Adicionar contato (botão dedicado — não é submit, para não enviar o form).
   $("#btn-add-contato")?.addEventListener("click", tratarAdicionarContato);
