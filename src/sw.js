@@ -8,7 +8,7 @@
    para forçar a atualização do cache nos dispositivos.
    ========================================================= */
 
-const CACHE_VERSAO = "clt-v13";
+const CACHE_VERSAO = "clt-v14";
 
 // App shell — tudo que o app precisa para abrir offline.
 const ASSETS = [
@@ -17,6 +17,8 @@ const ASSETS = [
   "./manifest.webmanifest",
   "./css/estilos.css",
   "./js/app.js",
+  "./js/config.js",
+  "./js/auth.js",
   "./js/db.js",
   "./js/estado.js",
   "./js/tela-ghe.js",

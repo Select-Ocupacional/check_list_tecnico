@@ -560,6 +560,52 @@ input.invalido, select.invalido, textarea.invalido {
 .rodape-nav__espaco { flex: 1; }
 .rodape-nav .btn { min-width: 120px; }
 
+/* --------- Tela de login --------- */
+.tela-login {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  padding-top: calc(20px + env(safe-area-inset-top));
+  overflow-y: auto;
+}
+.login-card {
+  background: var(--branco);
+  border-radius: var(--raio);
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+.login-logo {
+  width: 56px; height: 56px;
+  margin: 0 auto 12px;
+  display: grid; place-items: center;
+  background: var(--teal); color: var(--branco);
+  border-radius: 12px; font-weight: 700; font-size: 1.3rem;
+}
+.login-titulo { font-size: 1.15rem; margin: 0 0 2px; color: var(--navy); }
+.login-sub { font-size: 0.85rem; color: var(--cinza-medio); margin: 0 0 18px; }
+.login-card form .campo { text-align: left; }
+.login-card #btn-toggle-cadastro { margin-top: 8px; }
+
+/* Barra de usuário (tela inicial) */
+.usuario-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--cinza-borda);
+}
+.usuario-bar__email { font-size: 0.85rem; color: var(--cinza-medio); overflow-wrap: anywhere; }
+.usuario-bar .btn { min-height: 40px; padding: 0 14px; }
+
 /* --------- Cabeçalho: botão voltar (assistente) --------- */
 .app-header { justify-content: flex-start; }
 .app-header__voltar {

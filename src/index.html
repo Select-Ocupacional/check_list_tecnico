@@ -19,6 +19,32 @@
   <link rel="stylesheet" href="css/estilos.css" />
 </head>
 <body>
+  <!-- ============ TELA DE LOGIN (cobre o app até autenticar) ============ -->
+  <section id="tela-login" class="tela-login">
+    <div class="login-card">
+      <div class="login-logo" aria-hidden="true">SO</div>
+      <h1 class="login-titulo">Check-list de Visita Técnica</h1>
+      <p class="login-sub">Select Ocupacional — SST</p>
+      <form id="form-login" novalidate>
+        <div class="campo">
+          <label for="login_email">E-mail</label>
+          <input type="email" id="login_email" autocomplete="username" required />
+        </div>
+        <div class="campo">
+          <label for="login_senha">Senha</label>
+          <input type="password" id="login_senha" autocomplete="current-password" required />
+        </div>
+        <div class="campo" id="campo-login-nome" hidden>
+          <label for="login_nome">Nome</label>
+          <input type="text" id="login_nome" autocomplete="name" />
+        </div>
+        <small class="campo__erro" data-erro="login"></small>
+        <button type="submit" id="btn-login" class="btn btn--primario btn--bloco">Entrar</button>
+      </form>
+      <button type="button" id="btn-toggle-cadastro" class="btn btn--fantasma btn--bloco">Criar conta</button>
+    </div>
+  </section>
+
   <!-- Cabeçalho de marca (Navy) -->
   <header class="app-header">
     <button id="btn-inicio" class="app-header__voltar" hidden aria-label="Voltar para minhas visitas">‹</button>
@@ -58,6 +84,10 @@
   <main class="conteudo">
     <!-- ============ TELA INICIAL — LISTA DE VISITAS ============ -->
     <section id="tela-inicio" class="tela" aria-labelledby="titulo-inicio" hidden>
+      <div class="usuario-bar">
+        <span id="usuario-email" class="usuario-bar__email"></span>
+        <button type="button" id="btn-sair" class="btn btn--fantasma">Sair</button>
+      </div>
       <div class="inicio-cabecalho">
         <h2 id="titulo-inicio" class="tela__titulo">Minhas visitas</h2>
         <button id="btn-nova-visita-inicio" class="btn btn--primario">+ Nova visita</button>

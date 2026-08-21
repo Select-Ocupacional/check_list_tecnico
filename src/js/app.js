@@ -40,6 +40,13 @@ import {
   finalizarVisita,
 } from "./tela-encerramento.js";
 import { gerarRelatorio } from "./relatorio.js";
+import {
+  estaAutenticado,
+  usuarioAtual,
+  entrar,
+  cadastrar,
+  sair,
+} from "./auth.js";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -191,9 +198,79 @@ function podeAvancarDe(passo) {
   return true;
 }
 
+/* ---------- Autenticação (SST-BE-2) ---------- */
+
+let modoCadastro = false;
+
+function mostrarLogin() {
+  $("#tela-login").hidden = false;
+}
+
+/** Entra no app após autenticado: esconde o login e faz o boot. */
+async function entrarApp() {
+  $("#tela-login").hidden = true;
+  const u = usuarioAtual();
+  if (u) $("#usuario-email").textContent = u.email || "";
+  await migrarLocalStorage();
+  await mostrarInicio();
+}
+
+function inicializarLogin() {
+  const form = $("#form-login");
+  const erro = $('[data-erro="login"]');
+  const campoNome = $("#campo-login-nome");
+  const btnLogin = $("#btn-login");
+  const btnToggle = $("#btn-toggle-cadastro");
+
+  btnToggle.addEventListener("click", () => {
+    modoCadastro = !modoCadastro;
+    campoNome.hidden = !modoCadastro;
+    btnLogin.textContent = modoCadastro ? "Criar conta" : "Entrar";
+    btnToggle.textContent = modoCadastro ? "Já tenho conta" : "Criar conta";
+    if (erro) erro.textContent = "";
+  });
+
+  form.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    if (erro) erro.textContent = "";
+    const email = $("#login_email").value.trim();
+    const senha = $("#login_senha").value;
+    const nome = $("#login_nome").value.trim();
+    if (!email || !senha) { if (erro) erro.textContent = "Informe e-mail e senha."; return; }
+
+    btnLogin.disabled = true;
+    const textoOriginal = btnLogin.textContent;
+    btnLogin.textContent = "Aguarde…";
+    try {
+      if (modoCadastro) {
+        const s = await cadastrar(email, senha, nome);
+        if (!s) {
+          if (erro) erro.textContent = "Conta criada! Confirme o e-mail e depois faça login.";
+          btnToggle.click(); // volta ao modo login
+          return;
+        }
+      } else {
+        await entrar(email, senha);
+      }
+      await entrarApp();
+    } catch (e) {
+      if (erro) erro.textContent = navigator.onLine ? (e.message || "Falha na autenticação.") : "Sem conexão. O primeiro acesso precisa de internet.";
+    } finally {
+      btnLogin.disabled = false;
+      btnLogin.textContent = textoOriginal;
+    }
+  });
+
+  $("#btn-sair").addEventListener("click", () => {
+    sair();
+    location.reload();
+  });
+}
+
 /* ---------- Bootstrap ---------- */
 
 async function inicializar() {
+  inicializarLogin();
   inicializarTelaIdentificacao();
   inicializarTelaSetores();
   inicializarTelaRiscos();
@@ -234,8 +311,12 @@ async function inicializar() {
     entrarWizard();
   });
 
-  await migrarLocalStorage();
-  await mostrarInicio();
+  // Gate de autenticação: só entra no app se houver sessão.
+  if (estaAutenticado()) {
+    await entrarApp();
+  } else {
+    mostrarLogin();
+  }
 }
 
 document.addEventListener("DOMContentLoaded", inicializar);
