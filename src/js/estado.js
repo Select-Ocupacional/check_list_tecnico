@@ -14,7 +14,7 @@ import {
 
 // Chave do rascunho único da versão anterior (localStorage) — usada só na migração.
 const CHAVE_STORAGE_ANTIGA = "select_visita_tecnica_rascunho";
-const VERSAO_SCHEMA = "1.1.0";
+const VERSAO_SCHEMA = "1.2.0";
 
 /** Gera um UUID v4 (usa crypto nativo quando disponível). */
 export function gerarUuid() {
@@ -192,8 +192,6 @@ export function definirRiscoPresente(setorId, grupo, agente, presente) {
       agente,
       presente: true,
       nivel_exposicao: "nao_avaliado",
-      // Neutro por padrão (controles adequados); técnico ajusta se necessário.
-      conforme: "conforme",
       observacao: "",
     };
     setor.avaliacoes_risco.push(risco);

@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://select-ocupacional.com.br/schemas/checklist-visita-tecnica/1.1.0.json",
+  "$id": "https://select-ocupacional.com.br/schemas/checklist-visita-tecnica/1.2.0.json",
   "title": "Check-list de Visita Técnica (SST)",
   "description": "Contrato de dados da Visita Técnica de SST da Select Ocupacional. Fonte única de validação de integridade (SST-01).",
   "type": "object",
-  "$comment": "versao_schema deste contrato: 1.1.0 — 1.1.0 removeu o CPF (documento) da assinatura (SST-04-ajuste, minimizacao LGPD).",
+  "$comment": "versao_schema: 1.2.0. Historico: 1.1.0 removeu CPF da assinatura (SST-04-ajuste); 1.2.0 removeu 'conforme' da avaliacao de risco (SST-09) e acrescentou 'avaliar' ao nivel de exposicao (SST-10).",
   "required": [
     "id",
     "status",
@@ -126,7 +126,7 @@
     "avaliacaoRisco": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "grupo", "agente", "presente", "conforme"],
+      "required": ["id", "grupo", "agente", "presente"],
       "properties": {
         "id": { "$ref": "#/$defs/uuid" },
         "grupo": {
@@ -138,7 +138,8 @@
         "presente": { "type": "boolean" },
         "nivel_exposicao": {
           "type": "string",
-          "enum": ["nao_avaliado", "baixo", "medio", "alto"]
+          "$comment": "1.2.0 (SST-10) acrescentou 'avaliar' (requer quantificacao instrumental).",
+          "enum": ["nao_avaliado", "baixo", "medio", "alto", "avaliar"]
         },
         "medidas_controle_existentes": {
           "type": "array",
@@ -147,10 +148,6 @@
             "enum": ["epc", "epi", "administrativa", "nenhuma"]
           },
           "uniqueItems": true
-        },
-        "conforme": {
-          "type": "string",
-          "enum": ["conforme", "nao_conforme", "nao_aplicavel"]
         },
         "observacao": { "type": "string" },
         "evidencias": {

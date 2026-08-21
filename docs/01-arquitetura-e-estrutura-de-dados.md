@@ -123,9 +123,9 @@ Levantamento de um agente de risco. A taxonomia segue os 5 grupos clássicos de 
 | `agente` | string | ✅ | Ex.: "Ruído contínuo", "Poeira de sílica". Ver catálogo sugerido no Apêndice A. |
 | `fonte_geradora` | string | ⬜ | Ex.: "Compressor", "Corte de mármore". |
 | `presente` | boolean | ✅ | Se o risco foi identificado no setor. |
-| `nivel_exposicao` | enum | ⬜ | `nao_avaliado` \| `baixo` \| `medio` \| `alto`. |
+| `nivel_exposicao` | enum | ⬜ | `nao_avaliado` \| `baixo` \| `medio` \| `alto` \| `avaliar`. **`avaliar`** (schema 1.2.0, SST-10) = requer quantificação instrumental. |
 | `medidas_controle_existentes` | array de enum | ⬜ | `epc` \| `epi` \| `administrativa` \| `nenhuma`. |
-| `conforme` | enum | ✅ | `conforme` \| `nao_conforme` \| `nao_aplicavel`. |
+| ~~`conforme`~~ | — | — | **Removido no schema 1.2.0** (SST-09): a conformidade deixou de ser avaliada por risco. |
 | `observacao` | string | ⬜ | |
 | `evidencias` | array `EvidenciaFotografica` (ref.) | ⬜ | Fotos ilustrativas do risco. |
 

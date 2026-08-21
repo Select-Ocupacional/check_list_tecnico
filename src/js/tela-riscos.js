@@ -25,6 +25,7 @@ const NIVEIS = [
   { v: "baixo", t: "Baixo" },
   { v: "medio", t: "Médio" },
   { v: "alto", t: "Alto" },
+  { v: "avaliar", t: "Avaliar" }, // requer quantificação instrumental (SST-10)
 ];
 
 /* ---------- Seletor de setor ---------- */
@@ -54,20 +55,6 @@ function construirSeletorSetores() {
 function construirDetalheRisco(risco) {
   const wrap = document.createElement("div");
   wrap.className = "risco-detalhe";
-
-  // Conformidade dos controles (segmentado).
-  const rotConf = document.createElement("span");
-  rotConf.className = "rotulo-grupo";
-  rotConf.textContent = "Conformidade dos controles";
-  const conf = criarSegmentado(
-    [
-      { v: "conforme", t: "Conforme" },
-      { v: "nao_conforme", t: "Não conforme" },
-      { v: "nao_aplicavel", t: "N/A" },
-    ],
-    risco.conforme,
-    (val) => atualizarRisco(setorAtivoId, risco.id, { conforme: val })
-  );
 
   // Nível de exposição (select).
   const campoNivel = document.createElement("div");
@@ -103,11 +90,7 @@ function construirDetalheRisco(risco) {
   );
   campoObs.append(rotObs, obs);
 
-  const campoConf = document.createElement("div");
-  campoConf.className = "campo";
-  campoConf.append(rotConf, conf);
-
-  wrap.append(campoConf, campoNivel, campoObs);
+  wrap.append(campoNivel, campoObs);
   return wrap;
 }
 
@@ -306,27 +289,6 @@ function criarSwitch(marcado, rotulo, onChange) {
   input.addEventListener("change", () => onChange(input.checked));
   label.append(input, trilho);
   return label;
-}
-
-/** Cria um controle segmentado a partir de opções [{v,t}]. */
-function criarSegmentado(opcoes, valorAtual, onChange) {
-  const grupo = document.createElement("div");
-  grupo.className = "segmentado";
-  grupo.setAttribute("role", "group");
-  opcoes.forEach((op) => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.dataset.val = op.v;
-    btn.textContent = op.t;
-    btn.setAttribute("aria-pressed", String(op.v === valorAtual));
-    btn.addEventListener("click", () => {
-      grupo.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", "false"));
-      btn.setAttribute("aria-pressed", "true");
-      onChange(op.v);
-    });
-    grupo.appendChild(btn);
-  });
-  return grupo;
 }
 
 /** Liga o comportamento de seleção de um segmentado já presente no HTML. */
