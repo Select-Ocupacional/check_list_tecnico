@@ -39,6 +39,7 @@ import {
   resetarEncerramento,
   finalizarVisita,
 } from "./tela-encerramento.js";
+import { gerarRelatorio } from "./relatorio.js";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -98,6 +99,17 @@ async function renderizarListaVisitas() {
       entrarWizard();
     });
 
+    const relatorio = document.createElement("button");
+    relatorio.type = "button";
+    relatorio.className = "visita-card__relatorio";
+    relatorio.setAttribute("aria-label", "Gerar relatório (PDF)");
+    relatorio.textContent = "⎙";
+    relatorio.title = "Gerar relatório (PDF)";
+    relatorio.addEventListener("click", (e) => {
+      e.stopPropagation();
+      gerarRelatorio(v);
+    });
+
     const excluir = document.createElement("button");
     excluir.type = "button";
     excluir.className = "visita-card__excluir";
@@ -111,7 +123,7 @@ async function renderizarListaVisitas() {
       }
     });
 
-    li.append(abrir, excluir);
+    li.append(abrir, relatorio, excluir);
     lista.appendChild(li);
   });
 }

@@ -13,6 +13,7 @@ import {
 } from "./estado.js";
 import { criarPadAssinatura } from "./assinatura.js";
 import { validarEncerramento } from "./validacao.js";
+import { gerarRelatorio } from "./relatorio.js";
 
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
 
@@ -45,6 +46,7 @@ export function inicializarTelaEncerramento() {
   });
 
   // Ações do painel de sucesso.
+  $("#btn-relatorio")?.addEventListener("click", () => gerarRelatorio(estado.visita));
   $("#btn-baixar-json")?.addEventListener("click", baixarJson);
   $("#btn-nova-visita")?.addEventListener("click", iniciarNovaVisita);
 }

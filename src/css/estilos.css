@@ -594,6 +594,68 @@ input.invalido, select.invalido, textarea.invalido {
 .badge--sincronizada { background: #DBEAFE; color: #1E40AF; }
 .badge--cancelada { background: #F3F4F6; color: var(--cinza-medio); }
 
+/* Botão de relatório no card de visita */
+.visita-card__relatorio {
+  flex: 0 0 auto;
+  width: 48px;
+  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--cinza-borda);
+  color: var(--teal-escuro);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.visita-card__relatorio:hover { background: var(--cinza-claro); }
+
+/* --------- Relatório / laudo (impressão → Salvar como PDF) --------- */
+#relatorio-container { display: none; }
+
+.rel-doc { color: #111; font-size: 12px; line-height: 1.4; }
+.rel-cabecalho {
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 3px solid var(--navy); padding-bottom: 10px; margin-bottom: 14px;
+}
+.rel-logo {
+  width: 40px; height: 40px; border-radius: 8px;
+  background: var(--teal); color: #fff; font-weight: 700;
+  display: grid; place-items: center;
+}
+.rel-cabecalho h1 { font-size: 16px; margin: 0; color: var(--navy); }
+.rel-cabecalho p { font-size: 11px; margin: 2px 0 0; color: #555; }
+.rel-codigo { margin-left: auto; font-weight: 700; color: var(--navy); }
+.rel-sec { margin: 12px 0; break-inside: avoid; }
+.rel-sec h2 {
+  font-size: 13px; color: var(--navy); margin: 0 0 6px;
+  border-bottom: 2px solid var(--teal); padding-bottom: 3px;
+}
+.rel-item { margin: 8px 0; break-inside: avoid; }
+.rel-item h3 { font-size: 12px; margin: 0 0 3px; }
+.rel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; }
+.rel-col2 { grid-column: 1 / -1; }
+.rel-rot { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: .4px; color: #777; }
+.rel-desc { color: #555; margin: 2px 0; }
+.rel-lista { margin: 4px 0; padding-left: 18px; }
+.rel-lista li { margin: 2px 0; }
+.rel-tab { width: 100%; border-collapse: collapse; margin: 4px 0; }
+.rel-tab th, .rel-tab td { border: 1px solid #ccc; padding: 3px 5px; text-align: left; vertical-align: top; }
+.rel-tab th { background: #f0f0f0; font-size: 10px; }
+.rel-parecer { white-space: pre-wrap; }
+.rel-assinaturas { display: flex; gap: 24px; margin-top: 18px; flex-wrap: wrap; }
+.rel-assinatura { flex: 1 1 200px; text-align: center; }
+.rel-assinatura img { max-height: 70px; max-width: 100%; }
+.rel-assinatura__linha { border-top: 1px solid #333; margin-top: 4px; }
+.rel-assinatura p { margin: 4px 0 0; font-size: 11px; }
+.rel-rodape { margin-top: 20px; padding-top: 8px; border-top: 1px solid #ccc; font-size: 9px; color: #777; }
+
+@media print {
+  body > *:not(#relatorio-container) { display: none !important; }
+  #relatorio-container {
+    display: block !important;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  @page { margin: 14mm; }
+}
+
 /* --------- Responsivo: tablets e telas maiores --------- */
 @media (min-width: 600px) {
   .campo-linha { flex-direction: row; }

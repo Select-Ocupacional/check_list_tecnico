@@ -414,7 +414,8 @@
         <h3 class="sucesso__titulo">Visita concluída</h3>
         <p id="sucesso-resumo" class="sucesso__resumo"></p>
         <div class="sucesso__acoes">
-          <button type="button" id="btn-baixar-json" class="btn btn--secundario btn--bloco">Baixar JSON da visita</button>
+          <button type="button" id="btn-relatorio" class="btn btn--secundario btn--bloco">Gerar relatório (PDF)</button>
+          <button type="button" id="btn-baixar-json" class="btn btn--fantasma btn--bloco">Baixar JSON da visita</button>
           <button type="button" id="btn-nova-visita" class="btn btn--primario btn--bloco">Iniciar nova visita</button>
         </div>
       </div>
@@ -427,6 +428,9 @@
     <span class="rodape-nav__espaco"></span>
     <button type="button" id="btn-avancar" class="btn btn--primario">Avançar</button>
   </footer>
+
+  <!-- Container do relatório (só visível na impressão / Salvar como PDF) -->
+  <div id="relatorio-container" aria-hidden="true"></div>
 
   <script type="module" src="js/app.js"></script>
 
