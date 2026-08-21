@@ -389,6 +389,11 @@ input.invalido, select.invalido, textarea.invalido {
   border-top: 1px dashed var(--teal);
 }
 .risco-detalhe .campo { margin-bottom: 0; }
+/* Form "+ outro agente" (SST-14) */
+.risco-outro { padding: 8px 14px; }
+.risco-outro-form { display: flex; gap: 8px; width: 100%; }
+.risco-outro__nome { flex: 1; }
+.risco-outro__add { flex: 0 0 auto; width: 48px; padding: 0; font-size: 1.3rem; }
 .quant-dica { display: block; font-size: 0.75rem; color: var(--cinza-medio); margin-bottom: 6px; }
 .quant-linha { display: flex; gap: 8px; flex-wrap: wrap; }
 .quant-linha input[type="date"], .quant-linha input[type="time"] { flex: 1 1 130px; min-width: 0; }

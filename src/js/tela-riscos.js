@@ -217,6 +217,67 @@ function construirEvidencias(risco) {
   return campo;
 }
 
+/** Adiciona à lista um item (toggle + detalhe) de um agente. Retorna se está presente. */
+function adicionarItemRisco(lista, setor, grupoChave, agente) {
+  const existente = setor.avaliacoes_risco.find(
+    (r) => r.grupo === grupoChave && r.agente === agente
+  );
+  const presente = Boolean(existente);
+
+  const li = document.createElement("li");
+  li.className = "risco-item";
+  const nome = document.createElement("span");
+  nome.className = "risco-item__nome";
+  nome.textContent = agente;
+  const sw = criarSwitch(presente, `Risco: ${agente}`, (marcado) => {
+    definirRiscoPresente(setorAtivoId, grupoChave, agente, marcado);
+    renderizarRiscos();
+  });
+  li.append(nome, sw);
+  lista.appendChild(li);
+
+  if (existente) {
+    const detalheLi = document.createElement("li");
+    detalheLi.className = "risco-item risco-item--detalhe";
+    detalheLi.appendChild(construirDetalheRisco(existente));
+    lista.appendChild(detalheLi);
+  }
+  return presente;
+}
+
+/** Form "+ outro agente" para adicionar um risco fora do catálogo (SST-14). */
+function criarFormOutroAgente(grupoChave) {
+  const li = document.createElement("li");
+  li.className = "risco-item risco-outro";
+  const form = document.createElement("form");
+  form.className = "risco-outro-form";
+  form.noValidate = true;
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "risco-outro__nome";
+  input.placeholder = "Outro agente (especificar)";
+  input.setAttribute("aria-label", `Adicionar outro agente de risco (${grupoChave})`);
+
+  const add = document.createElement("button");
+  add.type = "submit";
+  add.className = "btn btn--secundario risco-outro__add";
+  add.textContent = "+";
+  add.setAttribute("aria-label", "Adicionar agente");
+
+  form.addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const nome = input.value.trim();
+    if (!nome) { input.focus(); return; }
+    definirRiscoPresente(setorAtivoId, grupoChave, nome, true);
+    renderizarRiscos();
+  });
+
+  form.append(input, add);
+  li.appendChild(form);
+  return li;
+}
+
 /** Renderiza todos os grupos e agentes de risco do setor ativo. */
 function renderizarRiscos() {
   const container = $("#riscos-container");
@@ -243,35 +304,16 @@ function renderizarRiscos() {
     lista.className = "risco-lista";
 
     let ativos = 0;
+    // Agentes do catálogo.
     CATALOGO_RISCOS[grupo.chave].forEach((agente) => {
-      const existente = setor.avaliacoes_risco.find(
-        (r) => r.grupo === grupo.chave && r.agente === agente
-      );
-      const presente = Boolean(existente);
-      if (presente) ativos++;
-
-      const li = document.createElement("li");
-      li.className = "risco-item";
-
-      const nome = document.createElement("span");
-      nome.className = "risco-item__nome";
-      nome.textContent = agente;
-
-      const sw = criarSwitch(presente, `Risco: ${agente}`, (marcado) => {
-        definirRiscoPresente(setorAtivoId, grupo.chave, agente, marcado);
-        renderizarRiscos(); // re-render para mostrar/ocultar o detalhe
-      });
-
-      li.append(nome, sw);
-      lista.appendChild(li);
-
-      if (existente) {
-        const detalheLi = document.createElement("li");
-        detalheLi.className = "risco-item risco-item--detalhe";
-        detalheLi.appendChild(construirDetalheRisco(existente));
-        lista.appendChild(detalheLi);
-      }
+      if (adicionarItemRisco(lista, setor, grupo.chave, agente)) ativos++;
     });
+    // Agentes customizados (fora do catálogo) já cadastrados neste setor.
+    setor.avaliacoes_risco
+      .filter((r) => r.grupo === grupo.chave && !CATALOGO_RISCOS[grupo.chave].includes(r.agente))
+      .forEach((r) => { if (adicionarItemRisco(lista, setor, grupo.chave, r.agente)) ativos++; });
+    // Form para adicionar outro agente.
+    lista.appendChild(criarFormOutroAgente(grupo.chave));
 
     contagem.textContent = ativos ? `${ativos} ativo(s)` : "nenhum";
     card.append(cab, lista);
