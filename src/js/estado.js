@@ -14,7 +14,7 @@ import {
 
 // Chave do rascunho único da versão anterior (localStorage) — usada só na migração.
 const CHAVE_STORAGE_ANTIGA = "select_visita_tecnica_rascunho";
-const VERSAO_SCHEMA = "1.6.0";
+const VERSAO_SCHEMA = "1.7.0";
 
 /** Gera um UUID v4 (usa crypto nativo quando disponível). */
 export function gerarUuid() {
@@ -49,6 +49,7 @@ export function criarVisitaVazia() {
     tecnico: { id: "", nome: "", funcao: "", registro_profissional: "" },
     setores: [],
     ghes: [],
+    treinamentos: [],
     nao_conformidades: [],
     assinaturas: [],
     observacoes_gerais: "",
@@ -115,7 +116,49 @@ export function alternarFuncaoNoGhe(gheId, funcaoId) {
   salvar();
 }
 
-/** Lista todas as funções cadastradas nos setores (para compor GHEs). */
+/* ---------- Treinamentos por função (SST-13) ---------- */
+
+/** Adiciona um treinamento (situação padrão: possui) e persiste. */
+export function adicionarTreinamento({ nome, situacao }) {
+  if (!Array.isArray(estado.visita.treinamentos)) estado.visita.treinamentos = [];
+  const treino = {
+    id: gerarUuid(),
+    nome: nome.trim(),
+    situacao: situacao || "possui",
+    funcoes_ref: [],
+  };
+  estado.visita.treinamentos.push(treino);
+  salvar();
+  return treino;
+}
+
+/** Remove um treinamento pelo id e persiste. */
+export function removerTreinamento(id) {
+  estado.visita.treinamentos = (estado.visita.treinamentos || []).filter((t) => t.id !== id);
+  salvar();
+}
+
+/** Atualiza um treinamento (ex.: situação) e persiste. */
+export function atualizarTreinamento(id, patch) {
+  const treino = (estado.visita.treinamentos || []).find((t) => t.id === id);
+  if (!treino) return null;
+  Object.assign(treino, patch);
+  salvar();
+  return treino;
+}
+
+/** Inclui/remove (toggle) a referência de uma função em um treinamento. */
+export function alternarFuncaoNoTreinamento(treinoId, funcaoId) {
+  const treino = (estado.visita.treinamentos || []).find((t) => t.id === treinoId);
+  if (!treino) return;
+  if (!Array.isArray(treino.funcoes_ref)) treino.funcoes_ref = [];
+  const i = treino.funcoes_ref.indexOf(funcaoId);
+  if (i >= 0) treino.funcoes_ref.splice(i, 1);
+  else treino.funcoes_ref.push(funcaoId);
+  salvar();
+}
+
+/** Lista todas as funções cadastradas nos setores (para compor GHEs/treinamentos). */
 export function listarFuncoesDisponiveis() {
   const out = [];
   (estado.visita.setores || []).forEach((setor) => {

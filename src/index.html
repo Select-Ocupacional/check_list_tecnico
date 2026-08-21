@@ -46,8 +46,11 @@
       <li class="passos__item" data-passo="ghe">
         <span class="passos__num">4</span> GHE
       </li>
+      <li class="passos__item" data-passo="treinamentos">
+        <span class="passos__num">5</span> Treinamentos
+      </li>
       <li class="passos__item" data-passo="encerramento">
-        <span class="passos__num">5</span> Encerramento
+        <span class="passos__num">6</span> Encerramento
       </li>
     </ol>
   </nav>
@@ -326,7 +329,28 @@
       <p id="ghe-vazio" class="lista-vazia">Nenhum GHE cadastrado ainda.</p>
     </section>
 
-    <!-- ============ TELA 5 — ENCERRAMENTO E ASSINATURAS ============ -->
+    <!-- ============ TELA TREINAMENTOS ============ -->
+    <section id="tela-treinamentos" class="tela" aria-labelledby="titulo-treinamentos" hidden>
+      <h2 id="titulo-treinamentos" class="tela__titulo">Treinamentos</h2>
+      <p class="tela__ajuda">Cadastre os treinamentos, informe a situação e vincule as funções (dos setores) que os realizam.</p>
+
+      <form id="form-novo-treinamento" class="setor-form" novalidate>
+        <div class="campo">
+          <label for="treinamento_nome">Nome do treinamento *</label>
+          <input type="text" id="treinamento_nome" name="treinamento_nome"
+                 placeholder="Ex.: NR-35 (Trabalho em Altura)" autocomplete="off" />
+          <small class="campo__erro" data-erro="treinamento_nome"></small>
+        </div>
+        <button type="submit" class="btn btn--secundario btn--bloco">+ Adicionar treinamento</button>
+      </form>
+
+      <p id="treinamentos-sem-funcoes" class="nota-norma" hidden>Nenhuma função cadastrada ainda — volte à etapa “Setores e funções” para vincular treinamentos às funções.</p>
+
+      <ul id="lista-treinamentos" class="lista-setores" aria-live="polite"></ul>
+      <p id="treinamentos-vazio" class="lista-vazia">Nenhum treinamento cadastrado ainda.</p>
+    </section>
+
+    <!-- ============ TELA 6 — ENCERRAMENTO E ASSINATURAS ============ -->
     <section id="tela-encerramento" class="tela" aria-labelledby="titulo-encerramento" hidden>
       <h2 id="titulo-encerramento" class="tela__titulo">Encerramento da visita</h2>
       <p class="tela__ajuda">Registre o parecer técnico, os dados do responsável e colete as assinaturas para concluir.</p>

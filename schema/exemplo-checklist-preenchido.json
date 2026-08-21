@@ -108,6 +108,14 @@
       ]
     }
   ],
+  "treinamentos": [
+    {
+      "id": "7a1b2c30-1111-4a22-8b33-4455667789b1",
+      "nome": "NR-12 (Seguranca em Maquinas)",
+      "situacao": "necessita_reciclagem",
+      "funcoes_ref": ["f1a2b3c4-1111-4a22-8b33-445566778911"]
+    }
+  ],
   "nao_conformidades": [
     {
       "id": "a7b8c9d0-7777-4a22-8b33-445566778855",
@@ -153,6 +161,6 @@
     "sincronizado_em": null,
     "dispositivo_id": "tablet-tecnico-07",
     "versao_app": "1.0.0",
-    "versao_schema": "1.6.0"
+    "versao_schema": "1.7.0"
   }
 }

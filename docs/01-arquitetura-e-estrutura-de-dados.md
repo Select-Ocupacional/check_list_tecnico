@@ -64,6 +64,7 @@ erDiagram
 | `tecnico` | objeto `Tecnico` | ✅ | Ver 3.4. |
 | `setores` | array `SetorAvaliado` | ✅ (≥1) | Ver 3.5. |
 | `ghes` | array `GHE` | ⬜ | **schema 1.6.0 (SST-12).** Grupos Homogêneos de Exposição. Ver 3.5-bis. |
+| `treinamentos` | array `Treinamento` | ⬜ | **schema 1.7.0 (SST-13).** Treinamentos por função. Ver 3.5-ter. |
 | `nao_conformidades` | array `NaoConformidade` | ⬜ | Ver 3.8. |
 | `assinaturas` | array `Assinatura` | ✅ (≥1) | Exigida na finalização. Ver 3.10. |
 | `observacoes_gerais` | string | ⬜ | Texto livre. |
@@ -141,6 +142,17 @@ Grupo de funções que compartilham a mesma exposição. Referencia funções ca
 | `nome` | string | ✅ | Ex.: "GHE 01 — Produção". |
 | `descricao` | string | ⬜ | |
 | `funcoes_ref` | array de UUID | ⬜ | Ids de `FuncaoSetor` que compõem o grupo. Resolvidos por lookup nos setores. |
+
+### 3.5-ter `Treinamento` (por função) — schema 1.7.0 (SST-13)
+
+Treinamento e sua situação, vinculado às funções que o realizam.
+
+| Campo | Tipo | Obrigatório | Observações |
+|-------|------|:----------:|-------------|
+| `id` | UUID v4 | ✅ | |
+| `nome` | string | ✅ | Ex.: "NR-35 (Trabalho em Altura)". |
+| `situacao` | enum | ✅ | `possui` \| `necessita_reciclagem` \| `nao_possui`. |
+| `funcoes_ref` | array de UUID | ⬜ | Ids de `FuncaoSetor` às quais o treinamento se aplica. |
 
 ### 3.6 `AvaliacaoRisco`
 
