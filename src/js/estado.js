@@ -14,7 +14,7 @@ import {
 
 // Chave do rascunho único da versão anterior (localStorage) — usada só na migração.
 const CHAVE_STORAGE_ANTIGA = "select_visita_tecnica_rascunho";
-const VERSAO_SCHEMA = "1.3.0";
+const VERSAO_SCHEMA = "1.4.0";
 
 /** Gera um UUID v4 (usa crypto nativo quando disponível). */
 export function gerarUuid() {
@@ -251,6 +251,10 @@ export function atualizarRisco(setorId, riscoId, patch) {
   const risco = setor?.avaliacoes_risco.find((r) => r.id === riscoId);
   if (!risco) return null;
   Object.assign(risco, patch);
+  // Remove chaves definidas como null/undefined no patch (ex.: quantificação vazia).
+  for (const chave of Object.keys(patch)) {
+    if (risco[chave] === null || risco[chave] === undefined) delete risco[chave];
+  }
   salvar();
   return risco;
 }

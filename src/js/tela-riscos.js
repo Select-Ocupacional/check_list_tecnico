@@ -90,7 +90,53 @@ function construirDetalheRisco(risco) {
   );
   campoObs.append(rotObs, obs);
 
-  wrap.append(campoNivel, campoObs);
+  // Quantificação (opcional): data, hora e equipamento da medição instrumental.
+  const campoQuant = document.createElement("div");
+  campoQuant.className = "campo";
+  const rotQuant = document.createElement("span");
+  rotQuant.className = "rotulo-grupo";
+  rotQuant.textContent = "Quantificação (opcional)";
+  const dicaQuant = document.createElement("small");
+  dicaQuant.className = "quant-dica";
+  dicaQuant.textContent = "Preencha quando o nível for “Avaliar” (ex.: dosimetria).";
+
+  const linha = document.createElement("div");
+  linha.className = "quant-linha";
+  const q = risco.quantificacao || {};
+
+  const inData = document.createElement("input");
+  inData.type = "date";
+  inData.value = q.data || "";
+  inData.setAttribute("aria-label", "Data da medição");
+
+  const inHora = document.createElement("input");
+  inHora.type = "time";
+  inHora.value = q.hora || "";
+  inHora.setAttribute("aria-label", "Hora da medição");
+
+  const inEquip = document.createElement("input");
+  inEquip.type = "text";
+  inEquip.placeholder = "Equipamento";
+  inEquip.value = q.equipamento || "";
+  inEquip.setAttribute("aria-label", "Equipamento da medição");
+
+  const atualizarQuant = () => {
+    const nova = {};
+    if (inData.value) nova.data = inData.value;
+    if (inHora.value) nova.hora = inHora.value;
+    if (inEquip.value.trim()) nova.equipamento = inEquip.value.trim();
+    atualizarRisco(setorAtivoId, risco.id, {
+      quantificacao: Object.keys(nova).length ? nova : null,
+    });
+  };
+  inData.addEventListener("change", atualizarQuant);
+  inHora.addEventListener("change", atualizarQuant);
+  inEquip.addEventListener("input", atualizarQuant);
+
+  linha.append(inData, inHora, inEquip);
+  campoQuant.append(rotQuant, dicaQuant, linha);
+
+  wrap.append(campoNivel, campoObs, campoQuant);
   return wrap;
 }
 

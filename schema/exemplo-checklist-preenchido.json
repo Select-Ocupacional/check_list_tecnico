@@ -52,6 +52,7 @@
           "nivel_exposicao": "avaliar",
           "medidas_controle_existentes": ["epi"],
           "observacao": "Nivel de pressao sonora elevado; EPC ausente. Requer dosimetria.",
+          "quantificacao": { "data": "2026-08-06", "hora": "10:15", "equipamento": "Dosimetro Marca X mod. Y" },
           "evidencias": [
             {
               "id": "c3d4e5f6-3333-4a22-8b33-445566778811",
@@ -139,6 +140,6 @@
     "sincronizado_em": null,
     "dispositivo_id": "tablet-tecnico-07",
     "versao_app": "1.0.0",
-    "versao_schema": "1.3.0"
+    "versao_schema": "1.4.0"
   }
 }

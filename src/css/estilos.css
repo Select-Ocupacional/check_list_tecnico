@@ -371,6 +371,10 @@ input.invalido, select.invalido, textarea.invalido {
   border-top: 1px dashed var(--teal);
 }
 .risco-detalhe .campo { margin-bottom: 0; }
+.quant-dica { display: block; font-size: 0.75rem; color: var(--cinza-medio); margin-bottom: 6px; }
+.quant-linha { display: flex; gap: 8px; flex-wrap: wrap; }
+.quant-linha input[type="date"], .quant-linha input[type="time"] { flex: 1 1 130px; min-width: 0; }
+.quant-linha input[type="text"] { flex: 2 1 160px; min-width: 0; }
 
 /* --------- Cartão de EPI/EPC em alerta --------- */
 .setor-card--alerta { border-left-color: var(--erro); }

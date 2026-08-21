@@ -136,6 +136,7 @@ Levantamento de um agente de risco. A taxonomia segue os 5 grupos clássicos de 
 | `medidas_controle_existentes` | array de enum | ⬜ | `epc` \| `epi` \| `administrativa` \| `nenhuma`. |
 | ~~`conforme`~~ | — | — | **Removido no schema 1.2.0** (SST-09): a conformidade deixou de ser avaliada por risco. |
 | `observacao` | string | ⬜ | |
+| `quantificacao` | objeto | ⬜ | **schema 1.4.0 (SST-11).** Medição instrumental: `data` (ISO), `hora` (`HH:mm`), `equipamento`. Relevante quando `nivel_exposicao = "avaliar"`. |
 | `evidencias` | array `EvidenciaFotografica` (ref.) | ⬜ | Fotos ilustrativas do risco. |
 
 ### 3.7 `VerificacaoEpiEpc`
