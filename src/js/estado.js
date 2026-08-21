@@ -5,7 +5,7 @@
    ========================================================= */
 
 const CHAVE_STORAGE = "select_visita_tecnica_rascunho";
-const VERSAO_SCHEMA = "1.0.0";
+const VERSAO_SCHEMA = "1.1.0";
 
 /** Gera um UUID v4 (usa crypto nativo quando disponível). */
 export function gerarUuid() {

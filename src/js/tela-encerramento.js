@@ -12,12 +12,7 @@ import {
   prepararParaValidacao,
 } from "./estado.js";
 import { criarPadAssinatura } from "./assinatura.js";
-import {
-  validarEncerramento,
-  formatarCpf,
-  formatarCep,
-  apenasDigitos,
-} from "./validacao.js";
+import { validarEncerramento } from "./validacao.js";
 
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
 
@@ -39,10 +34,6 @@ export function inicializarTelaEncerramento() {
       if (alvo === "assinatura-tecnico") padTecnico.limpar();
     });
   });
-
-  // Máscaras.
-  const cpf = $("#responsavel_doc");
-  cpf?.addEventListener("input", () => { cpf.value = formatarCpf(cpf.value); });
 
   // Autosave dos campos de texto do encerramento (offline-first).
   const form = $("#form-encerramento");
@@ -96,12 +87,10 @@ function mostrarErros(erros) {
 export function finalizarVisita() {
   const parecer = $("#parecer").value;
   const responsavelNome = $("#responsavel_nome").value;
-  const responsavelDoc = $("#responsavel_doc").value;
 
   const erros = validarEncerramento({
     parecer,
     responsavelNome,
-    responsavelDoc,
     assinaturaTecnico: !padTecnico.estaVazio(),
     assinaturaResponsavel: !padResponsavel.estaVazio(),
   });
@@ -129,7 +118,6 @@ export function finalizarVisita() {
       papel: "responsavel_empresa",
       nome: responsavelNome.trim(),
       cargo: $("#responsavel_cargo").value.trim() || undefined,
-      documento: apenasDigitos(responsavelDoc) || undefined,
       assinatura_ref: padResponsavel.paraDataURL(),
       assinado_em: agora,
     }),

@@ -86,33 +86,9 @@ export function formatarCep(valor) {
   return c.replace(/^(\d{5})(\d)/, "$1-$2");
 }
 
-/** Formata CPF para exibição: 000.000.000-00. */
-export function formatarCpf(valor) {
-  const c = apenasDigitos(valor).slice(0, 11);
-  return c
-    .replace(/^(\d{3})(\d)/, "$1.$2")
-    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
-    .replace(/\.(\d{3})(\d)/, ".$1-$2");
-}
-
-/** Valida CPF (11 dígitos + dígitos verificadores). */
-export function validarCpf(valor) {
-  const c = apenasDigitos(valor);
-  if (c.length !== 11) return false;
-  if (/^(\d)\1{10}$/.test(c)) return false;
-
-  const calc = (qtd) => {
-    let soma = 0;
-    for (let i = 0; i < qtd; i++) soma += Number(c[i]) * (qtd + 1 - i);
-    const resto = (soma * 10) % 11;
-    return resto === 10 ? 0 : resto;
-  };
-  return calc(9) === Number(c[9]) && calc(10) === Number(c[10]);
-}
-
 /**
  * Valida a Tela 4 (Encerramento).
- * @param {object} dados { parecer, responsavelNome, responsavelDoc,
+ * @param {object} dados { parecer, responsavelNome,
  *                          assinaturaTecnico, assinaturaResponsavel }
  *   As duas últimas são booleanas: true = assinatura coletada.
  * @returns {Object<string,string>} mapa de erros por campo.
@@ -124,9 +100,6 @@ export function validarEncerramento(dados) {
   }
   if (!dados.responsavelNome || !dados.responsavelNome.trim()) {
     erros.responsavel_nome = "Informe o nome do responsável.";
-  }
-  if (dados.responsavelDoc && !validarCpf(dados.responsavelDoc)) {
-    erros.responsavel_doc = "CPF inválido — confira os dígitos.";
   }
   if (!dados.assinaturaTecnico) {
     erros.assinatura_tecnico = "Colete a assinatura do técnico.";

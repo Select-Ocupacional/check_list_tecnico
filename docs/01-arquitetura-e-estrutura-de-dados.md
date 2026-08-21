@@ -182,7 +182,7 @@ Registro consolidado de uma não-conformidade encontrada, com recomendação e p
 | `papel` | enum | ✅ | `tecnico` \| `responsavel_empresa`. |
 | `nome` | string | ✅ | |
 | `cargo` | string | ⬜ | |
-| `documento` | string | ⬜ | CPF do responsável — **dado sensível** (ver seção 7). |
+| ~~`documento` (CPF)~~ | — | — | **Removido no schema 1.1.0** (SST-04-ajuste): minimização de dados LGPD. Não coletamos mais o CPF do responsável. |
 | `assinatura_ref` | string | ✅ | Referência à imagem da assinatura (mesma lógica de storage das fotos). |
 | `assinado_em` | datetime ISO-8601 | ✅ | |
 

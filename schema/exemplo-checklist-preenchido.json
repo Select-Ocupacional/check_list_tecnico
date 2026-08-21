@@ -126,7 +126,6 @@
       "papel": "responsavel_empresa",
       "nome": "Joao Pereira",
       "cargo": "Coordenador de SST",
-      "documento": "11122233344",
       "assinatura_ref": "visitas/3f2504e0-4f89-41d3-9a0c-0305e82c3301/assinaturas/responsavel.png",
       "assinado_em": "2026-08-06T11:40:00-03:00"
     }
@@ -138,6 +137,6 @@
     "sincronizado_em": null,
     "dispositivo_id": "tablet-tecnico-07",
     "versao_app": "1.0.0",
-    "versao_schema": "1.0.0"
+    "versao_schema": "1.1.0"
   }
 }

@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://select-ocupacional.com.br/schemas/checklist-visita-tecnica/1.0.0.json",
+  "$id": "https://select-ocupacional.com.br/schemas/checklist-visita-tecnica/1.1.0.json",
   "title": "Check-list de Visita Técnica (SST)",
   "description": "Contrato de dados da Visita Técnica de SST da Select Ocupacional. Fonte única de validação de integridade (SST-01).",
   "type": "object",
-  "$comment": "versao_schema deste contrato: 1.0.0",
+  "$comment": "versao_schema deste contrato: 1.1.0 — 1.1.0 removeu o CPF (documento) da assinatura (SST-04-ajuste, minimizacao LGPD).",
   "required": [
     "id",
     "status",
@@ -258,11 +258,6 @@
         "papel": { "type": "string", "enum": ["tecnico", "responsavel_empresa"] },
         "nome": { "type": "string", "minLength": 1 },
         "cargo": { "type": "string" },
-        "documento": {
-          "type": "string",
-          "description": "CPF do responsavel. DADO SENSIVEL (LGPD) - restringir exposicao.",
-          "pattern": "^[0-9]{11}$"
-        },
         "assinatura_ref": { "type": "string", "minLength": 1 },
         "assinado_em": { "$ref": "#/$defs/datetimeIso" }
       }
