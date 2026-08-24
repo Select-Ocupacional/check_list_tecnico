@@ -17,6 +17,7 @@ import {
   removerEvidencia,
 } from "./estado.js";
 import { GRUPOS, CATALOGO_RISCOS } from "./catalogo-riscos.js";
+import { EPIS_NR06 } from "./catalogo-epi.js";
 import { comprimirImagem } from "./imagem.js";
 import { resolverRef } from "./storage.js";
 
@@ -410,6 +411,16 @@ function inicializarFormEpi() {
   const selTipo = $("#epi_tipo");
   const campoCa = $("#campo-ca");
   const erro = $('[data-erro="epi_form"]');
+
+  // Popula a lista de EPIs (NR-06) — o técnico pode escolher ou digitar outro.
+  const datalist = $("#lista-epi-nr06");
+  if (datalist && !datalist.childElementCount) {
+    EPIS_NR06.forEach((nome) => {
+      const opt = document.createElement("option");
+      opt.value = nome;
+      datalist.appendChild(opt);
+    });
+  }
 
   const atualizarVisibilidadeCa = () => {
     campoCa.hidden = selTipo.value !== "epi";
