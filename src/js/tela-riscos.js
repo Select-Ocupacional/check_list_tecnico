@@ -591,5 +591,14 @@ export function inicializarTelaRiscos() {
     renderizarRiscos();
     renderizarEpis();
   });
+
+  // "Incluir outra função / setor": volta ao topo (seletores) para avaliar a próxima.
+  $("#btn-incluir-outra")?.addEventListener("click", () => {
+    const topo = $("#setor_ativo")?.closest(".setor-seletor") || $("#setor_ativo");
+    topo?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const fsel = $("#funcao_ativa");
+    if (fsel) { try { fsel.focus({ preventScroll: true }); } catch { fsel.focus(); } }
+  });
+
   inicializarFormEpi();
 }
