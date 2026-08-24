@@ -401,7 +401,10 @@
         <fieldset class="grupo">
           <legend class="grupo__legenda">Parecer técnico</legend>
           <div class="campo">
-            <label for="parecer">Parecer / conclusão da vistoria *</label>
+            <div class="parecer-cabecalho">
+              <label for="parecer">Parecer / conclusão da vistoria *</label>
+              <button type="button" id="btn-ditar" class="btn btn--secundario btn-ditar" hidden>🎤 Ditar</button>
+            </div>
             <textarea id="parecer" name="parecer" rows="5"
                       placeholder="Resumo das condições encontradas, principais riscos e recomendações."></textarea>
             <small class="campo__erro" data-erro="parecer"></small>

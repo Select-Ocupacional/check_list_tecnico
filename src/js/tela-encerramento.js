@@ -45,10 +45,68 @@ export function inicializarTelaEncerramento() {
     agendarSalvamento();
   });
 
+  inicializarDitado();
+
   // Ações do painel de sucesso.
   $("#btn-relatorio")?.addEventListener("click", () => gerarRelatorio(estado.visita));
   $("#btn-baixar-json")?.addEventListener("click", baixarJson);
   $("#btn-nova-visita")?.addEventListener("click", iniciarNovaVisita);
+}
+
+/** Ditado por voz (Web Speech API) para o campo Parecer. Requer conexão. */
+function inicializarDitado() {
+  const btn = $("#btn-ditar");
+  const parecer = $("#parecer");
+  if (!btn || !parecer) return;
+  const Reconhecimento = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!Reconhecimento) return; // navegador sem suporte: botão fica oculto
+
+  btn.hidden = false;
+  const rec = new Reconhecimento();
+  rec.lang = "pt-BR";
+  rec.continuous = true;
+  rec.interimResults = true;
+
+  let ativo = false;
+  let base = "";
+  let finalAcum = "";
+
+  const parar = () => {
+    ativo = false;
+    btn.classList.remove("btn-ditar--ativo");
+    btn.textContent = "🎤 Ditar";
+  };
+
+  rec.onresult = (e) => {
+    let interim = "";
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) finalAcum += t;
+      else interim += t;
+    }
+    parecer.value = (base + finalAcum + interim).replace(/\s+/g, " ").trimStart();
+    parecer.dispatchEvent(new Event("input", { bubbles: true })); // autosave
+  };
+  rec.onerror = () => parar();
+  rec.onend = () => {
+    parecer.value = (base + finalAcum).replace(/\s+/g, " ").trim();
+    parecer.dispatchEvent(new Event("input", { bubbles: true }));
+    parar();
+  };
+
+  btn.addEventListener("click", () => {
+    if (ativo) { rec.stop(); return; }
+    base = parecer.value ? parecer.value.trimEnd() + " " : "";
+    finalAcum = "";
+    ativo = true;
+    btn.classList.add("btn-ditar--ativo");
+    btn.textContent = "⏹ Parar";
+    try {
+      rec.start();
+    } catch {
+      parar();
+    }
+  });
 }
 
 /** (Re)renderiza a tela ao entrar: dimensiona canvas e pré-preenche. */
