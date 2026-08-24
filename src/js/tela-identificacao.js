@@ -215,7 +215,7 @@ export function inicializarTelaIdentificacao() {
       const sel = $("#grau_risco");
       if (sel) sel.value = String(grau);
       if (dica) dica.textContent = `Grau ${grau} preenchido pela tabela NR-04 (verificar vigência). Ajuste se necessário.`;
-    } else if (apenasDigitos(cnae.value).length === 7) {
+    } else if (apenasDigitos(cnae.value).length >= 5) {
       if (dica) dica.textContent = "CNAE não encontrado na tabela — informe o grau manualmente.";
     } else if (dica) {
       dica.textContent = "";
