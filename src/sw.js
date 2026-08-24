@@ -8,7 +8,7 @@
    para forçar a atualização do cache nos dispositivos.
    ========================================================= */
 
-const CACHE_VERSAO = "clt-v24";
+const CACHE_VERSAO = "clt-v25";
 
 // App shell — tudo que o app precisa para abrir offline.
 const ASSETS = [
@@ -57,25 +57,41 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Busca: cache-first para GET mesma origem; navegações caem no index.html offline.
+// Busca: "rede primeiro" para o app shell dinâmico (HTML/JS/CSS) — garante a
+// versão mais recente quando online e evita misturar arquivos de versões
+// diferentes após um deploy; cai no cache quando offline. Demais assets
+// (imagens, ícones, manifest, fontes) usam "cache primeiro" por performance.
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
 
   const url = new URL(req.url);
   const mesmaOrigem = url.origin === self.location.origin;
+  if (!mesmaOrigem) return; // fontes/CDN etc.: deixa o navegador tratar
 
-  // Navegação (abrir o app): tenta rede, cai no cache do index.html offline.
-  if (req.mode === "navigate") {
+  const dinamico = req.mode === "navigate" || /\.(?:js|css|html)$/.test(url.pathname);
+
+  if (dinamico) {
+    // Rede primeiro: atualiza o cache a cada sucesso; offline cai no cache.
     event.respondWith(
-      fetch(req).catch(() => caches.match("./index.html"))
+      fetch(req)
+        .then((resp) => {
+          if (resp && resp.ok && resp.type === "basic") {
+            const copia = resp.clone();
+            caches.open(CACHE_VERSAO).then((cache) => cache.put(req, copia));
+          }
+          return resp;
+        })
+        .catch(() =>
+          caches.match(req).then((cacheado) =>
+            cacheado || (req.mode === "navigate" ? caches.match("./index.html") : undefined)
+          )
+        )
     );
     return;
   }
 
-  if (!mesmaOrigem) return; // fontes/CDN etc.: deixa o navegador tratar
-
-  // Cache-first: responde do cache; se não houver, busca na rede e guarda.
+  // Cache primeiro: responde do cache; se não houver, busca na rede e guarda.
   event.respondWith(
     caches.match(req).then((cacheado) => {
       if (cacheado) return cacheado;
