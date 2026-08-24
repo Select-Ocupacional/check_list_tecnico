@@ -11,8 +11,18 @@
     "cnpj": "12345678000199",
     "codigo_cliente_erp": "CLI-0087",
     "contatos": [
-      { "id": "c0a1b2c3-1111-4a22-8b33-445566778901", "nome": "Joao Pereira", "email": "joao.pereira@metalex.com.br", "departamento": "SST", "telefone": "19999990000" },
-      { "id": "c0a1b2c3-2222-4a22-8b33-445566778902", "nome": "Ana Lima", "departamento": "RH" }
+      {
+        "id": "c0a1b2c3-1111-4a22-8b33-445566778901",
+        "nome": "Joao Pereira",
+        "email": "joao.pereira@metalex.com.br",
+        "departamento": "SST",
+        "telefone": "19999990000"
+      },
+      {
+        "id": "c0a1b2c3-2222-4a22-8b33-445566778902",
+        "nome": "Ana Lima",
+        "departamento": "RH"
+      }
     ]
   },
   "unidade": {
@@ -41,58 +51,74 @@
       "nome": "Producao - Linha de Corte",
       "descricao": "Setor de corte e conformacao de chapas metalicas.",
       "funcoes": [
-        { "id": "f1a2b3c4-1111-4a22-8b33-445566778911", "nome": "Operador de prensa", "quantidade": 5 },
-        { "id": "f1a2b3c4-2222-4a22-8b33-445566778912", "nome": "Auxiliar de producao", "quantidade": 3 }
-      ],
-      "avaliacoes_risco": [
         {
-          "id": "b2c3d4e5-2222-4a22-8b33-445566778800",
-          "grupo": "fisico",
-          "agente": "Ruido continuo",
-          "fonte_geradora": "Guilhotina e prensas",
-          "presente": true,
-          "nivel_exposicao": "avaliar",
-          "medidas_controle_existentes": ["epi"],
-          "observacao": "Nivel de pressao sonora elevado; EPC ausente. Requer dosimetria.",
-          "quantificacao": { "data": "2026-08-06", "hora": "10:15", "equipamento": "Dosimetro Marca X mod. Y" },
-          "evidencias": [
+          "id": "f1a2b3c4-1111-4a22-8b33-445566778911",
+          "nome": "Operador de prensa",
+          "quantidade": 5,
+          "avaliacoes_risco": [
             {
-              "id": "c3d4e5f6-3333-4a22-8b33-445566778811",
-              "arquivo_ref": "visitas/3f2504e0-4f89-41d3-9a0c-0305e82c3301/fotos/ruido-linha-corte.jpg",
-              "legenda": "Prensas sem enclausuramento acustico",
-              "capturada_em": "2026-08-06T09:32:00-03:00"
+              "id": "b2c3d4e5-2222-4a22-8b33-445566778800",
+              "grupo": "fisico",
+              "agente": "Ruido continuo",
+              "fonte_geradora": "Guilhotina e prensas",
+              "presente": true,
+              "nivel_exposicao": "avaliar",
+              "medidas_controle_existentes": [
+                "epi"
+              ],
+              "observacao": "Nivel de pressao sonora elevado; EPC ausente. Requer dosimetria.",
+              "quantificacao": {
+                "data": "2026-08-06",
+                "hora": "10:15",
+                "equipamento": "Dosimetro Marca X mod. Y"
+              },
+              "evidencias": [
+                {
+                  "id": "c3d4e5f6-3333-4a22-8b33-445566778811",
+                  "arquivo_ref": "visitas/3f2504e0-4f89-41d3-9a0c-0305e82c3301/fotos/ruido-linha-corte.jpg",
+                  "legenda": "Prensas sem enclausuramento acustico",
+                  "capturada_em": "2026-08-06T09:32:00-03:00"
+                }
+              ]
+            },
+            {
+              "id": "d4e5f6a7-4444-4a22-8b33-445566778822",
+              "grupo": "acidente",
+              "agente": "Maquina sem protecao",
+              "fonte_geradora": "Guilhotina",
+              "presente": true,
+              "nivel_exposicao": "alto",
+              "medidas_controle_existentes": [
+                "nenhuma"
+              ],
+              "observacao": "Zona de prensagem sem protecao fixa/movel."
+            }
+          ],
+          "verificacoes_epi_epc": [
+            {
+              "id": "e5f6a7b8-5555-4a22-8b33-445566778833",
+              "tipo": "epi",
+              "descricao": "Protetor auricular tipo concha",
+              "numero_ca": "CA-12345",
+              "fornecido": true,
+              "em_uso": false,
+              "estado_conservacao": "regular",
+              "conforme": "nao_conforme",
+              "observacao": "Fornecido, porem sem uso efetivo pelos operadores."
+            },
+            {
+              "id": "f6a7b8c9-6666-4a22-8b33-445566778844",
+              "tipo": "epc",
+              "descricao": "Enclausuramento acustico das prensas",
+              "conforme": "nao_conforme",
+              "observacao": "Nao instalado."
             }
           ]
         },
         {
-          "id": "d4e5f6a7-4444-4a22-8b33-445566778822",
-          "grupo": "acidente",
-          "agente": "Maquina sem protecao",
-          "fonte_geradora": "Guilhotina",
-          "presente": true,
-          "nivel_exposicao": "alto",
-          "medidas_controle_existentes": ["nenhuma"],
-          "observacao": "Zona de prensagem sem protecao fixa/movel."
-        }
-      ],
-      "verificacoes_epi_epc": [
-        {
-          "id": "e5f6a7b8-5555-4a22-8b33-445566778833",
-          "tipo": "epi",
-          "descricao": "Protetor auricular tipo concha",
-          "numero_ca": "CA-12345",
-          "fornecido": true,
-          "em_uso": false,
-          "estado_conservacao": "regular",
-          "conforme": "nao_conforme",
-          "observacao": "Fornecido, porem sem uso efetivo pelos operadores."
-        },
-        {
-          "id": "f6a7b8c9-6666-4a22-8b33-445566778844",
-          "tipo": "epc",
-          "descricao": "Enclausuramento acustico das prensas",
-          "conforme": "nao_conforme",
-          "observacao": "Nao instalado."
+          "id": "f1a2b3c4-2222-4a22-8b33-445566778912",
+          "nome": "Auxiliar de producao",
+          "quantidade": 3
         }
       ]
     }
@@ -113,7 +139,9 @@
       "id": "7a1b2c30-1111-4a22-8b33-4455667789b1",
       "nome": "NR-12 (Seguranca em Maquinas)",
       "situacao": "necessita_reciclagem",
-      "funcoes_ref": ["f1a2b3c4-1111-4a22-8b33-445566778911"]
+      "funcoes_ref": [
+        "f1a2b3c4-1111-4a22-8b33-445566778911"
+      ]
     }
   ],
   "nao_conformidades": [
@@ -131,7 +159,10 @@
           "arquivo_ref": "visitas/3f2504e0-4f89-41d3-9a0c-0305e82c3301/fotos/guilhotina-sem-protecao.jpg",
           "legenda": "Zona de prensagem exposta",
           "capturada_em": "2026-08-06T09:48:00-03:00",
-          "geolocalizacao": { "lat": -22.7539, "lng": -47.4141 }
+          "geolocalizacao": {
+            "lat": -22.7539,
+            "lng": -47.4141
+          }
         }
       ]
     }
@@ -161,6 +192,6 @@
     "sincronizado_em": null,
     "dispositivo_id": "tablet-tecnico-07",
     "versao_app": "1.0.0",
-    "versao_schema": "1.7.0"
+    "versao_schema": "1.8.0"
   }
 }

@@ -90,18 +90,20 @@ function blocoSetores(v) {
 }
 
 function blocoRiscos(v) {
-  const temAlgum = (v.setores || []).some((s) => (s.avaliacoes_risco || []).length || (s.verificacoes_epi_epc || []).length);
+  const temAlgum = (v.setores || []).some((s) =>
+    (s.funcoes || []).some((f) => (f.avaliacoes_risco || []).length || (f.verificacoes_epi_epc || []).length)
+  );
   if (!temAlgum) return "";
   return `
     <section class="rel-sec">
       <h2>Riscos ocupacionais e EPIs/EPCs</h2>
-      ${v.setores.map((s) => {
-        const riscos = s.avaliacoes_risco || [];
-        const epis = s.verificacoes_epi_epc || [];
+      ${v.setores.map((s) => (s.funcoes || []).map((f) => {
+        const riscos = f.avaliacoes_risco || [];
+        const epis = f.verificacoes_epi_epc || [];
         if (!riscos.length && !epis.length) return "";
         return `
           <div class="rel-item">
-            <h3>${esc(s.nome)}</h3>
+            <h3>${esc(s.nome)} — ${esc(f.nome)}</h3>
             ${riscos.length ? `
               <table class="rel-tab">
                 <thead><tr><th>Grupo</th><th>Agente</th><th>Nível</th><th>Quantificação</th><th>Observação</th></tr></thead>
@@ -131,7 +133,7 @@ function blocoRiscos(v) {
                 </tbody>
               </table>` : ""}
           </div>`;
-      }).join("")}
+      }).join("")).join("")}
     </section>`;
 }
 
@@ -214,9 +216,11 @@ export async function gerarRelatorio(visita) {
     ? structuredClone(visita)
     : JSON.parse(JSON.stringify(visita));
   for (const s of v.setores || []) {
-    for (const r of s.avaliacoes_risco || []) {
-      for (const ev of r.evidencias || []) {
-        ev.arquivo_ref = await resolverRef(ev.arquivo_ref);
+    for (const f of s.funcoes || []) {
+      for (const r of f.avaliacoes_risco || []) {
+        for (const ev of r.evidencias || []) {
+          ev.arquivo_ref = await resolverRef(ev.arquivo_ref);
+        }
       }
     }
   }

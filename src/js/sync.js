@@ -48,12 +48,14 @@ async function subirBinarios(v) {
   if (!uid) return;
 
   for (const setor of v.setores || []) {
-    for (const risco of setor.avaliacoes_risco || []) {
-      for (const ev of risco.evidencias || []) {
-        if (ehDataUrl(ev.arquivo_ref)) {
-          const path = `${uid}/${v.id}/evidencias/${ev.id}.jpg`;
-          await uploadBinario(path, ev.arquivo_ref);
-          ev.arquivo_ref = path;
+    for (const funcao of setor.funcoes || []) {
+      for (const risco of funcao.avaliacoes_risco || []) {
+        for (const ev of risco.evidencias || []) {
+          if (ehDataUrl(ev.arquivo_ref)) {
+            const path = `${uid}/${v.id}/evidencias/${ev.id}.jpg`;
+            await uploadBinario(path, ev.arquivo_ref);
+            ev.arquivo_ref = path;
+          }
         }
       }
     }

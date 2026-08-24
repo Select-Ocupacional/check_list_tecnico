@@ -213,8 +213,9 @@ function mostrarSucesso() {
 
   const v = estado.visita;
   const nSetores = v.setores.length;
-  const nRiscos = v.setores.reduce((s, x) => s + x.avaliacoes_risco.length, 0);
-  const nEpis = v.setores.reduce((s, x) => s + x.verificacoes_epi_epc.length, 0);
+  const funcoes = v.setores.flatMap((x) => x.funcoes || []);
+  const nRiscos = funcoes.reduce((s, f) => s + (f.avaliacoes_risco?.length || 0), 0);
+  const nEpis = funcoes.reduce((s, f) => s + (f.verificacoes_epi_epc?.length || 0), 0);
   $("#sucesso-resumo").textContent =
     `${v.cliente.razao_social} — ${nSetores} setor(es), ${nRiscos} risco(s) e ${nEpis} EPI/EPC registrados. Rascunho salvo neste dispositivo.`;
 

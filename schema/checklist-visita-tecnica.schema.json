@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://select-ocupacional.com.br/schemas/checklist-visita-tecnica/1.7.0.json",
+  "$id": "https://select-ocupacional.com.br/schemas/checklist-visita-tecnica/1.8.0.json",
   "title": "Check-list de Visita Técnica (SST)",
   "description": "Contrato de dados da Visita Técnica de SST da Select Ocupacional. Fonte única de validação de integridade (SST-01).",
   "type": "object",
-  "$comment": "versao_schema: 1.7.0. Historico: 1.1.0 removeu CPF (SST-04-ajuste); 1.2.0 removeu 'conforme' (SST-09) e +'avaliar' (SST-10); 1.3.0 +'funcoes' no setor (SST-08); 1.4.0 +'quantificacao' no risco (SST-11); 1.5.0 +'contatos' (SST-06); 1.6.0 +'ghes' (SST-12); 1.7.0 +'treinamentos' por funcao (SST-13).",
+  "$comment": "versao_schema: 1.8.0. Historico: 1.1.0 removeu CPF; 1.2.0 removeu 'conforme' (SST-09) e +'avaliar' (SST-10); 1.3.0 +'funcoes' (SST-08); 1.4.0 +'quantificacao' (SST-11); 1.5.0 +'contatos' (SST-06); 1.6.0 +'ghes' (SST-12); 1.7.0 +'treinamentos' (SST-13); 1.8.0 moveu avaliacoes_risco/verificacoes_epi_epc do setor para a FUNCAO.",
   "required": [
     "id",
     "status",
@@ -140,16 +140,8 @@
         "descricao": { "type": "string" },
         "funcoes": {
           "type": "array",
-          "$comment": "1.3.0 (SST-08): funcoes do setor com quantidade de funcionarios por funcao.",
+          "$comment": "1.3.0 (SST-08): funcoes do setor. 1.8.0: riscos/EPIs passam a ser por funcao.",
           "items": { "$ref": "#/$defs/funcaoSetor" }
-        },
-        "avaliacoes_risco": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/avaliacaoRisco" }
-        },
-        "verificacoes_epi_epc": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/verificacaoEpiEpc" }
         }
       }
     },
@@ -160,7 +152,17 @@
       "properties": {
         "id": { "$ref": "#/$defs/uuid" },
         "nome": { "type": "string", "minLength": 1 },
-        "quantidade": { "type": "integer", "minimum": 0 }
+        "quantidade": { "type": "integer", "minimum": 0 },
+        "avaliacoes_risco": {
+          "type": "array",
+          "$comment": "1.8.0: avaliacao de risco por funcao.",
+          "items": { "$ref": "#/$defs/avaliacaoRisco" }
+        },
+        "verificacoes_epi_epc": {
+          "type": "array",
+          "$comment": "1.8.0: verificacao de EPI/EPC por funcao.",
+          "items": { "$ref": "#/$defs/verificacaoEpiEpc" }
+        }
       }
     },
     "ghe": {

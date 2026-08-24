@@ -1,13 +1,15 @@
 /* =========================================================
-   tela-riscos.js — Tela 3: Riscos ocupacionais e EPIs/EPCs (por setor).
-   Constrói dinamicamente os grupos de risco a partir do catálogo e
-   reflete/edita o estado do setor ativo. Mantém a filosofia offline-first
-   (toda alteração persiste via estado.js).
+   tela-riscos.js — Tela 3: Riscos ocupacionais e EPIs/EPCs (por função).
+   O técnico escolhe o Setor e, em seguida, a Função avaliada (funções vindas
+   da Tela 2). Só após a função ser selecionada os riscos e EPIs/EPCs são
+   registrados — e são salvos POR FUNÇÃO (schema 1.8.0).
+   Mantém a filosofia offline-first (toda alteração persiste via estado.js).
    ========================================================= */
 
 import {
   estado,
   obterSetor,
+  obterFuncao,
   definirRiscoPresente,
   atualizarRisco,
   adicionarEpiEpc,
@@ -23,8 +25,9 @@ import { resolverRef } from "./storage.js";
 
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
 
-// Setor atualmente em avaliação nesta tela.
+// Setor e função atualmente em avaliação nesta tela.
 let setorAtivoId = null;
+let funcaoAtivaId = null;
 
 const NIVEIS = [
   { v: "nao_avaliado", t: "Não avaliado" },
@@ -34,7 +37,7 @@ const NIVEIS = [
   { v: "avaliar", t: "Avaliar" }, // requer quantificação instrumental (SST-10)
 ];
 
-/* ---------- Seletor de setor ---------- */
+/* ---------- Seletores de setor e função ---------- */
 
 function construirSeletorSetores() {
   const sel = $("#setor_ativo");
@@ -55,9 +58,37 @@ function construirSeletorSetores() {
   if (setorAtivoId) sel.value = setorAtivoId;
 }
 
+/** Popula o seletor de funções do setor ativo e mantém a função ativa válida. */
+function construirSeletorFuncoes() {
+  const sel = $("#funcao_ativa");
+  if (!sel) return;
+  const setor = obterSetor(setorAtivoId);
+  const funcoes = setor?.funcoes ?? [];
+  sel.innerHTML = "";
+
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = funcoes.length ? "— Selecione a função —" : "— Sem funções —";
+  sel.appendChild(placeholder);
+
+  funcoes.forEach((f) => {
+    const opt = document.createElement("option");
+    opt.value = f.id;
+    opt.textContent = f.quantidade != null ? `${f.nome} (${f.quantidade})` : f.nome;
+    sel.appendChild(opt);
+  });
+
+  // Mantém a função ativa apenas se ainda pertencer a este setor.
+  if (!funcoes.some((f) => f.id === funcaoAtivaId)) {
+    funcaoAtivaId = null;
+  }
+  sel.value = funcaoAtivaId || "";
+  sel.disabled = funcoes.length === 0;
+}
+
 /* ---------- Riscos ---------- */
 
-/** Cria o painel de detalhe (conformidade/nível/observação) de um risco presente. */
+/** Cria o painel de detalhe (nível/observação/quantificação/fotos) de um risco presente. */
 function construirDetalheRisco(risco) {
   const wrap = document.createElement("div");
   wrap.className = "risco-detalhe";
@@ -77,7 +108,7 @@ function construirDetalheRisco(risco) {
   });
   selNivel.value = risco.nivel_exposicao || "nao_avaliado";
   selNivel.addEventListener("change", () =>
-    atualizarRisco(setorAtivoId, risco.id, { nivel_exposicao: selNivel.value })
+    atualizarRisco(setorAtivoId, funcaoAtivaId, risco.id, { nivel_exposicao: selNivel.value })
   );
   campoNivel.append(rotNivel, selNivel);
 
@@ -92,7 +123,7 @@ function construirDetalheRisco(risco) {
   obs.value = risco.observacao || "";
   obs.placeholder = "Ex.: fonte geradora, medida existente…";
   obs.addEventListener("input", () =>
-    atualizarRisco(setorAtivoId, risco.id, { observacao: obs.value })
+    atualizarRisco(setorAtivoId, funcaoAtivaId, risco.id, { observacao: obs.value })
   );
   campoObs.append(rotObs, obs);
 
@@ -131,7 +162,7 @@ function construirDetalheRisco(risco) {
     if (inData.value) nova.data = inData.value;
     if (inHora.value) nova.hora = inHora.value;
     if (inEquip.value.trim()) nova.equipamento = inEquip.value.trim();
-    atualizarRisco(setorAtivoId, risco.id, {
+    atualizarRisco(setorAtivoId, funcaoAtivaId, risco.id, {
       quantificacao: Object.keys(nova).length ? nova : null,
     });
   };
@@ -175,7 +206,7 @@ function construirEvidencias(risco) {
       legenda.className = "risco-foto__legenda";
       legenda.value = ev.legenda || "";
       legenda.addEventListener("input", () =>
-        atualizarEvidencia(setorAtivoId, risco.id, ev.id, { legenda: legenda.value })
+        atualizarEvidencia(setorAtivoId, funcaoAtivaId, risco.id, ev.id, { legenda: legenda.value })
       );
 
       const remover = document.createElement("button");
@@ -184,7 +215,7 @@ function construirEvidencias(risco) {
       remover.setAttribute("aria-label", "Remover foto");
       remover.textContent = "✕";
       remover.addEventListener("click", () => {
-        removerEvidencia(setorAtivoId, risco.id, ev.id);
+        removerEvidencia(setorAtivoId, funcaoAtivaId, risco.id, ev.id);
         renderGaleria();
       });
 
@@ -200,7 +231,7 @@ function construirEvidencias(risco) {
       if (!arquivo.type.startsWith("image/")) continue;
       try {
         const dataUrl = await comprimirImagem(arquivo);
-        adicionarEvidencia(setorAtivoId, risco.id, { arquivo_ref: dataUrl });
+        adicionarEvidencia(setorAtivoId, funcaoAtivaId, risco.id, { arquivo_ref: dataUrl });
       } catch (e) {
         console.warn("Falha ao processar a foto:", e);
       }
@@ -242,8 +273,8 @@ function construirEvidencias(risco) {
 }
 
 /** Adiciona à lista um item (toggle + detalhe) de um agente. Retorna se está presente. */
-function adicionarItemRisco(lista, setor, grupoChave, agente) {
-  const existente = setor.avaliacoes_risco.find(
+function adicionarItemRisco(lista, funcao, grupoChave, agente) {
+  const existente = funcao.avaliacoes_risco.find(
     (r) => r.grupo === grupoChave && r.agente === agente
   );
   const presente = Boolean(existente);
@@ -254,7 +285,7 @@ function adicionarItemRisco(lista, setor, grupoChave, agente) {
   nome.className = "risco-item__nome";
   nome.textContent = agente;
   const sw = criarSwitch(presente, `Risco: ${agente}`, (marcado) => {
-    definirRiscoPresente(setorAtivoId, grupoChave, agente, marcado);
+    definirRiscoPresente(setorAtivoId, funcaoAtivaId, grupoChave, agente, marcado);
     renderizarRiscos();
   });
   li.append(nome, sw);
@@ -293,7 +324,7 @@ function criarFormOutroAgente(grupoChave) {
     ev.preventDefault();
     const nome = input.value.trim();
     if (!nome) { input.focus(); return; }
-    definirRiscoPresente(setorAtivoId, grupoChave, nome, true);
+    definirRiscoPresente(setorAtivoId, funcaoAtivaId, grupoChave, nome, true);
     renderizarRiscos();
   });
 
@@ -302,13 +333,13 @@ function criarFormOutroAgente(grupoChave) {
   return li;
 }
 
-/** Renderiza todos os grupos e agentes de risco do setor ativo. */
+/** Renderiza todos os grupos e agentes de risco da função ativa. */
 function renderizarRiscos() {
   const container = $("#riscos-container");
   if (!container) return;
   container.innerHTML = "";
-  const setor = obterSetor(setorAtivoId);
-  if (!setor) return;
+  const funcao = obterFuncao(setorAtivoId, funcaoAtivaId);
+  if (!funcao) return;
 
   GRUPOS.forEach((grupo) => {
     const card = document.createElement("section");
@@ -330,12 +361,12 @@ function renderizarRiscos() {
     let ativos = 0;
     // Agentes do catálogo.
     CATALOGO_RISCOS[grupo.chave].forEach((agente) => {
-      if (adicionarItemRisco(lista, setor, grupo.chave, agente)) ativos++;
+      if (adicionarItemRisco(lista, funcao, grupo.chave, agente)) ativos++;
     });
-    // Agentes customizados (fora do catálogo) já cadastrados neste setor.
-    setor.avaliacoes_risco
+    // Agentes customizados (fora do catálogo) já cadastrados nesta função.
+    funcao.avaliacoes_risco
       .filter((r) => r.grupo === grupo.chave && !CATALOGO_RISCOS[grupo.chave].includes(r.agente))
-      .forEach((r) => { if (adicionarItemRisco(lista, setor, grupo.chave, r.agente)) ativos++; });
+      .forEach((r) => { if (adicionarItemRisco(lista, funcao, grupo.chave, r.agente)) ativos++; });
     // Form para adicionar outro agente.
     lista.appendChild(criarFormOutroAgente(grupo.chave));
 
@@ -351,9 +382,9 @@ function renderizarEpis() {
   const lista = $("#lista-epi");
   const vazio = $("#epi-vazio");
   if (!lista) return;
-  const setor = obterSetor(setorAtivoId);
+  const funcao = obterFuncao(setorAtivoId, funcaoAtivaId);
   lista.innerHTML = "";
-  const itens = setor?.verificacoes_epi_epc ?? [];
+  const itens = funcao?.verificacoes_epi_epc ?? [];
   vazio.hidden = itens.length > 0;
 
   const rotuloConserv = { bom: "Adequado", regular: "Regular", ruim: "Inadequado", nao_aplicavel: "N/A" };
@@ -390,7 +421,7 @@ function renderizarEpis() {
     btn.setAttribute("aria-label", `Remover ${item.descricao}`);
     btn.textContent = "✕";
     btn.addEventListener("click", () => {
-      removerEpiEpc(setorAtivoId, item.id);
+      removerEpiEpc(setorAtivoId, funcaoAtivaId, item.id);
       renderizarEpis();
     });
 
@@ -445,6 +476,8 @@ function inicializarFormEpi() {
     ev.preventDefault();
     erro.textContent = "";
 
+    if (!funcaoAtivaId) return falhar("Selecione uma função antes de adicionar EPIs/EPCs.");
+
     const tipo = selTipo.value;
     const descricao = $("#epi_descricao").value.trim();
     const numero_ca = $("#epi_ca").value.trim();
@@ -468,7 +501,7 @@ function inicializarFormEpi() {
     };
     dados.conforme = derivarConformeEpi(dados);
 
-    adicionarEpiEpc(setorAtivoId, dados);
+    adicionarEpiEpc(setorAtivoId, funcaoAtivaId, dados);
     form.reset();
     limparSegmentado("#epi_fornecido");
     limparSegmentado("#epi_em_uso");
@@ -523,9 +556,21 @@ function limparSegmentado(sel) {
 
 /* ---------- API da tela ---------- */
 
+/** Mostra/oculta o conteúdo por função e a mensagem de "setor sem funções". */
+function atualizarVisibilidade() {
+  const setor = obterSetor(setorAtivoId);
+  const temFuncoes = (setor?.funcoes?.length ?? 0) > 0;
+  const conteudo = $("#riscos-conteudo");
+  const semFuncao = $("#riscos-sem-funcao");
+  if (semFuncao) semFuncao.hidden = temFuncoes;
+  if (conteudo) conteudo.hidden = !(temFuncoes && funcaoAtivaId);
+}
+
 /** (Re)renderiza toda a Tela 3 — chamado ao entrar na tela. */
 export function renderizarTelaRiscos() {
   construirSeletorSetores();
+  construirSeletorFuncoes();
+  atualizarVisibilidade();
   renderizarRiscos();
   renderizarEpis();
 }
@@ -534,6 +579,15 @@ export function renderizarTelaRiscos() {
 export function inicializarTelaRiscos() {
   $("#setor_ativo")?.addEventListener("change", (ev) => {
     setorAtivoId = ev.target.value;
+    funcaoAtivaId = null; // ao trocar de setor, exige nova seleção de função
+    construirSeletorFuncoes();
+    atualizarVisibilidade();
+    renderizarRiscos();
+    renderizarEpis();
+  });
+  $("#funcao_ativa")?.addEventListener("change", (ev) => {
+    funcaoAtivaId = ev.target.value || null;
+    atualizarVisibilidade();
     renderizarRiscos();
     renderizarEpis();
   });

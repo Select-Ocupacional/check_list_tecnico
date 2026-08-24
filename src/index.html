@@ -275,7 +275,7 @@
     <!-- ============ TELA 3 — RISCOS OCUPACIONAIS E EPI/EPC ============ -->
     <section id="tela-riscos" class="tela" aria-labelledby="titulo-riscos" hidden>
       <h2 id="titulo-riscos" class="tela__titulo">Riscos ocupacionais e EPIs/EPCs</h2>
-      <p class="tela__ajuda">Selecione o setor e registre os riscos encontrados e a verificação de EPIs/EPCs. Os dados são salvos por setor.</p>
+      <p class="tela__ajuda">Selecione o setor e a função avaliada, depois registre os riscos e a verificação de EPIs/EPCs. Os dados são salvos por função.</p>
 
       <div class="campo setor-seletor">
         <label for="setor_ativo">Setor em avaliação</label>
@@ -283,9 +283,20 @@
         <small id="setor_ativo_ajuda" class="nota-norma">Troque o setor para avaliar cada ambiente percorrido.</small>
       </div>
 
+      <div class="campo setor-seletor">
+        <label for="funcao_ativa">Função avaliada</label>
+        <select id="funcao_ativa" aria-describedby="funcao_ativa_ajuda"></select>
+        <small id="funcao_ativa_ajuda" class="nota-norma">Os riscos e EPIs/EPCs são registrados por função. As funções vêm da Tela 2 (Setores).</small>
+      </div>
+
+      <!-- Aviso quando o setor não tem funções cadastradas -->
+      <p id="riscos-sem-funcao" class="lista-vazia" hidden>Este setor não possui funções cadastradas. Volte à Tela 2 (Setores) e adicione as funções deste setor para avaliar os riscos e EPIs/EPCs.</p>
+
+      <!-- Conteúdo por função: só aparece após uma função ser selecionada -->
+      <div id="riscos-conteudo" hidden>
       <!-- Riscos: grupos e agentes gerados dinamicamente (catalogo-riscos.js) -->
       <h3 class="subtitulo">Riscos ocupacionais</h3>
-      <p class="tela__ajuda">Ative os agentes de risco identificados no setor. Ao ativar, informe o nível de exposição.</p>
+      <p class="tela__ajuda">Ative os agentes de risco identificados para esta função. Ao ativar, informe o nível de exposição.</p>
       <div id="riscos-container" aria-live="polite"></div>
 
       <!-- EPI / EPC -->
@@ -343,7 +354,8 @@
       </form>
 
       <ul id="lista-epi" class="lista-setores" aria-live="polite"></ul>
-      <p id="epi-vazio" class="lista-vazia">Nenhum EPI/EPC registrado neste setor.</p>
+      <p id="epi-vazio" class="lista-vazia">Nenhum EPI/EPC registrado nesta função.</p>
+      </div><!-- /#riscos-conteudo -->
     </section>
 
     <!-- ============ TELA GHE — GRUPOS HOMOGÊNEOS DE EXPOSIÇÃO ============ -->

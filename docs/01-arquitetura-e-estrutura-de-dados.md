@@ -120,17 +120,19 @@ Um setor/ambiente/posto percorrido durante a vistoria. Agrupa as avaliações da
 | `id` | UUID v4 | ✅ | |
 | `nome` | string | ✅ | Ex.: "Produção — Linha 2", "Almoxarifado". |
 | `descricao` | string | ⬜ | |
-| `funcoes` | array `FuncaoSetor` | ⬜ | **schema 1.3.0 (SST-08).** Funções do setor com nº de funcionários. Base para o GHE (SST-12). |
-| `avaliacoes_risco` | array `AvaliacaoRisco` | ⬜ | Ver 3.6. |
-| `verificacoes_epi_epc` | array `VerificacaoEpiEpc` | ⬜ | Ver 3.7. |
+| `funcoes` | array `FuncaoSetor` | ⬜ | **schema 1.3.0 (SST-08).** Funções do setor com nº de funcionários. Base para o GHE (SST-12) e para os riscos/EPIs (1.8.0). |
 
-#### `FuncaoSetor` (schema 1.3.0)
+> **schema 1.8.0:** os campos `avaliacoes_risco` e `verificacoes_epi_epc` **saíram do `SetorAvaliado`** e passaram a pertencer a cada `FuncaoSetor`. Na Tela 3, o técnico escolhe o setor e a função antes de registrar riscos e EPIs/EPCs. Rascunhos anteriores (≤1.7.0) são migrados ao abrir: os dados do setor são movidos para a primeira função (uma função "Geral" é criada se o setor não tiver nenhuma).
+
+#### `FuncaoSetor` (schema 1.3.0; riscos/EPIs a partir de 1.8.0)
 
 | Campo | Tipo | Obrigatório | Observações |
 |-------|------|:----------:|-------------|
 | `id` | UUID v4 | ✅ | |
 | `nome` | string | ✅ | Ex.: "Operador de prensa". |
 | `quantidade` | inteiro ≥ 0 | ⬜ | Nº de funcionários naquela função no setor. |
+| `avaliacoes_risco` | array `AvaliacaoRisco` | ⬜ | **schema 1.8.0.** Riscos ocupacionais da função. Ver 3.6. |
+| `verificacoes_epi_epc` | array `VerificacaoEpiEpc` | ⬜ | **schema 1.8.0.** EPIs/EPCs verificados para a função. Ver 3.7. |
 
 ### 3.5-bis `GHE` (Grupo Homogêneo de Exposição) — schema 1.6.0 (SST-12)
 

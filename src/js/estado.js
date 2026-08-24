@@ -14,7 +14,7 @@ import {
 
 // Chave do rascunho único da versão anterior (localStorage) — usada só na migração.
 const CHAVE_STORAGE_ANTIGA = "select_visita_tecnica_rascunho";
-const VERSAO_SCHEMA = "1.7.0";
+const VERSAO_SCHEMA = "1.8.0";
 
 /** Gera um UUID v4 (usa crypto nativo quando disponível). */
 export function gerarUuid() {
@@ -207,11 +207,43 @@ export async function novaVisita() {
   return estado.visita;
 }
 
+/**
+ * Migra rascunhos anteriores (schema ≤1.7.0), em que os riscos e EPIs/EPCs
+ * ficavam no SETOR, para o novo formato por FUNÇÃO (1.8.0). Os dados do setor
+ * são movidos para uma função "Geral" (criada se o setor não tiver funções),
+ * evitando perda de informação. Idempotente.
+ */
+function migrarRiscosParaFuncao(v) {
+  for (const setor of v?.setores || []) {
+    if (!Array.isArray(setor.funcoes)) setor.funcoes = [];
+    const temLegado = (setor.avaliacoes_risco?.length || 0) || (setor.verificacoes_epi_epc?.length || 0);
+    if (temLegado) {
+      let alvo = setor.funcoes[0];
+      if (!alvo) {
+        alvo = { id: gerarUuid(), nome: "Geral", avaliacoes_risco: [], verificacoes_epi_epc: [] };
+        setor.funcoes.push(alvo);
+      }
+      if (!Array.isArray(alvo.avaliacoes_risco)) alvo.avaliacoes_risco = [];
+      if (!Array.isArray(alvo.verificacoes_epi_epc)) alvo.verificacoes_epi_epc = [];
+      alvo.avaliacoes_risco.push(...(setor.avaliacoes_risco || []));
+      alvo.verificacoes_epi_epc.push(...(setor.verificacoes_epi_epc || []));
+    }
+    delete setor.avaliacoes_risco;
+    delete setor.verificacoes_epi_epc;
+    // Garante os arrays em todas as funções (formato 1.8.0).
+    for (const f of setor.funcoes) {
+      if (!Array.isArray(f.avaliacoes_risco)) f.avaliacoes_risco = [];
+      if (!Array.isArray(f.verificacoes_epi_epc)) f.verificacoes_epi_epc = [];
+    }
+  }
+  return v;
+}
+
 /** Abre uma visita salva pelo id e a define como atual. */
 export async function abrirVisita(id) {
   const v = await dbObter(id);
-  if (v) estado.visita = v;
-  return v || null;
+  if (v) estado.visita = migrarRiscosParaFuncao(v);
+  return estado.visita || null;
 }
 
 /** Lista as visitas salvas, mais recentes primeiro. */
@@ -264,8 +296,6 @@ export function adicionarSetor({ nome, descricao }) {
     nome: nome.trim(),
     descricao: (descricao || "").trim(),
     funcoes: [],
-    avaliacoes_risco: [],
-    verificacoes_epi_epc: [],
   };
   if (!setor.descricao) delete setor.descricao;
   estado.visita.setores.push(setor);
@@ -286,7 +316,7 @@ export function adicionarFuncao(setorId, { nome, quantidade }) {
   const setor = obterSetor(setorId);
   if (!setor) return null;
   if (!Array.isArray(setor.funcoes)) setor.funcoes = [];
-  const funcao = { id: gerarUuid(), nome: nome.trim() };
+  const funcao = { id: gerarUuid(), nome: nome.trim(), avaliacoes_risco: [], verificacoes_epi_epc: [] };
   const qtd = Number(quantidade);
   if (Number.isFinite(qtd) && qtd >= 0 && String(quantidade).trim() !== "") {
     funcao.quantidade = qtd;
@@ -322,22 +352,31 @@ export function obterSetor(setorId) {
   return estado.visita.setores.find((s) => s.id === setorId);
 }
 
-/* ---------- Riscos ocupacionais (por setor) ---------- */
+/** Retorna a função (dentro de um setor) pelo id, garantindo os arrays. */
+export function obterFuncao(setorId, funcaoId) {
+  const funcao = obterSetor(setorId)?.funcoes?.find((f) => f.id === funcaoId);
+  if (funcao) {
+    if (!Array.isArray(funcao.avaliacoes_risco)) funcao.avaliacoes_risco = [];
+    if (!Array.isArray(funcao.verificacoes_epi_epc)) funcao.verificacoes_epi_epc = [];
+  }
+  return funcao;
+}
+
+/* ---------- Riscos ocupacionais (por função, schema 1.8.0) ---------- */
 
 /**
- * Marca/desmarca a presença de um risco no setor. Identidade = grupo + agente.
- * Ao marcar, cria uma AvaliacaoRisco no formato do schema; ao desmarcar, remove.
+ * Marca/desmarca a presença de um risco na função. Identidade = grupo + agente.
  * @returns {object|null} a avaliação criada, ou null ao remover.
  */
-export function definirRiscoPresente(setorId, grupo, agente, presente) {
-  const setor = obterSetor(setorId);
-  if (!setor) return null;
-  const idx = setor.avaliacoes_risco.findIndex(
+export function definirRiscoPresente(setorId, funcaoId, grupo, agente, presente) {
+  const funcao = obterFuncao(setorId, funcaoId);
+  if (!funcao) return null;
+  const idx = funcao.avaliacoes_risco.findIndex(
     (r) => r.grupo === grupo && r.agente === agente
   );
 
   if (presente) {
-    if (idx >= 0) return setor.avaliacoes_risco[idx];
+    if (idx >= 0) return funcao.avaliacoes_risco[idx];
     const risco = {
       id: gerarUuid(),
       grupo,
@@ -346,25 +385,24 @@ export function definirRiscoPresente(setorId, grupo, agente, presente) {
       nivel_exposicao: "nao_avaliado",
       observacao: "",
     };
-    setor.avaliacoes_risco.push(risco);
+    funcao.avaliacoes_risco.push(risco);
     salvar();
     return risco;
   }
 
   if (idx >= 0) {
-    setor.avaliacoes_risco.splice(idx, 1);
+    funcao.avaliacoes_risco.splice(idx, 1);
     salvar();
   }
   return null;
 }
 
 /** Aplica alterações a uma AvaliacaoRisco existente e persiste. */
-export function atualizarRisco(setorId, riscoId, patch) {
-  const setor = obterSetor(setorId);
-  const risco = setor?.avaliacoes_risco.find((r) => r.id === riscoId);
+export function atualizarRisco(setorId, funcaoId, riscoId, patch) {
+  const funcao = obterFuncao(setorId, funcaoId);
+  const risco = funcao?.avaliacoes_risco.find((r) => r.id === riscoId);
   if (!risco) return null;
   Object.assign(risco, patch);
-  // Remove chaves definidas como null/undefined no patch (ex.: quantificação vazia).
   for (const chave of Object.keys(patch)) {
     if (risco[chave] === null || risco[chave] === undefined) delete risco[chave];
   }
@@ -375,16 +413,12 @@ export function atualizarRisco(setorId, riscoId, patch) {
 /* ---------- Evidências fotográficas do risco (SST-15) ---------- */
 
 /** Adiciona uma evidência (foto) a um risco. arquivo_ref = data URL (offline). */
-export function adicionarEvidencia(setorId, riscoId, { arquivo_ref, legenda, capturada_em }) {
-  const setor = obterSetor(setorId);
-  const risco = setor?.avaliacoes_risco.find((r) => r.id === riscoId);
+export function adicionarEvidencia(setorId, funcaoId, riscoId, { arquivo_ref, legenda, capturada_em }) {
+  const funcao = obterFuncao(setorId, funcaoId);
+  const risco = funcao?.avaliacoes_risco.find((r) => r.id === riscoId);
   if (!risco) return null;
   if (!Array.isArray(risco.evidencias)) risco.evidencias = [];
-  const ev = {
-    id: gerarUuid(),
-    arquivo_ref,
-    capturada_em: capturada_em || agoraIso(),
-  };
+  const ev = { id: gerarUuid(), arquivo_ref, capturada_em: capturada_em || agoraIso() };
   if (legenda && legenda.trim()) ev.legenda = legenda.trim();
   risco.evidencias.push(ev);
   salvar();
@@ -392,9 +426,9 @@ export function adicionarEvidencia(setorId, riscoId, { arquivo_ref, legenda, cap
 }
 
 /** Atualiza a legenda (ou outros campos) de uma evidência. */
-export function atualizarEvidencia(setorId, riscoId, evidenciaId, patch) {
-  const setor = obterSetor(setorId);
-  const risco = setor?.avaliacoes_risco.find((r) => r.id === riscoId);
+export function atualizarEvidencia(setorId, funcaoId, riscoId, evidenciaId, patch) {
+  const funcao = obterFuncao(setorId, funcaoId);
+  const risco = funcao?.avaliacoes_risco.find((r) => r.id === riscoId);
   const ev = risco?.evidencias?.find((e) => e.id === evidenciaId);
   if (!ev) return null;
   Object.assign(ev, patch);
@@ -404,20 +438,20 @@ export function atualizarEvidencia(setorId, riscoId, evidenciaId, patch) {
 }
 
 /** Remove uma evidência de um risco. */
-export function removerEvidencia(setorId, riscoId, evidenciaId) {
-  const setor = obterSetor(setorId);
-  const risco = setor?.avaliacoes_risco.find((r) => r.id === riscoId);
+export function removerEvidencia(setorId, funcaoId, riscoId, evidenciaId) {
+  const funcao = obterFuncao(setorId, funcaoId);
+  const risco = funcao?.avaliacoes_risco.find((r) => r.id === riscoId);
   if (!risco?.evidencias) return;
   risco.evidencias = risco.evidencias.filter((e) => e.id !== evidenciaId);
   salvar();
 }
 
-/* ---------- EPI / EPC (por setor) ---------- */
+/* ---------- EPI / EPC (por função, schema 1.8.0) ---------- */
 
-/** Adiciona uma VerificacaoEpiEpc ao setor e persiste. */
-export function adicionarEpiEpc(setorId, dados) {
-  const setor = obterSetor(setorId);
-  if (!setor) return null;
+/** Adiciona uma VerificacaoEpiEpc à função e persiste. */
+export function adicionarEpiEpc(setorId, funcaoId, dados) {
+  const funcao = obterFuncao(setorId, funcaoId);
+  if (!funcao) return null;
   const item = {
     id: gerarUuid(),
     tipo: dados.tipo,
@@ -428,19 +462,18 @@ export function adicionarEpiEpc(setorId, dados) {
     conforme: dados.conforme,
     observacao: (dados.observacao || "").trim(),
   };
-  // numero_ca é obrigatório apenas para EPI (regra do schema).
   if (dados.tipo === "epi" && dados.numero_ca) item.numero_ca = dados.numero_ca.trim();
   if (!item.observacao) delete item.observacao;
-  setor.verificacoes_epi_epc.push(item);
+  funcao.verificacoes_epi_epc.push(item);
   salvar();
   return item;
 }
 
-/** Remove uma VerificacaoEpiEpc do setor e persiste. */
-export function removerEpiEpc(setorId, itemId) {
-  const setor = obterSetor(setorId);
-  if (!setor) return;
-  setor.verificacoes_epi_epc = setor.verificacoes_epi_epc.filter((i) => i.id !== itemId);
+/** Remove uma VerificacaoEpiEpc da função e persiste. */
+export function removerEpiEpc(setorId, funcaoId, itemId) {
+  const funcao = obterFuncao(setorId, funcaoId);
+  if (!funcao) return;
+  funcao.verificacoes_epi_epc = funcao.verificacoes_epi_epc.filter((i) => i.id !== itemId);
   salvar();
 }
 
