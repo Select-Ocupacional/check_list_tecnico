@@ -17,7 +17,7 @@ import {
   removerEvidencia,
 } from "./estado.js";
 import { GRUPOS, CATALOGO_RISCOS } from "./catalogo-riscos.js";
-import { EPIS_NR06 } from "./catalogo-epi.js";
+import { EPIS_NR06, EPCS_COMUNS } from "./catalogo-epi.js";
 import { comprimirImagem } from "./imagem.js";
 import { resolverRef } from "./storage.js";
 
@@ -412,21 +412,29 @@ function inicializarFormEpi() {
   const campoCa = $("#campo-ca");
   const erro = $('[data-erro="epi_form"]');
 
-  // Popula a lista de EPIs (NR-06) — o técnico pode escolher ou digitar outro.
-  const datalist = $("#lista-epi-nr06");
-  if (datalist && !datalist.childElementCount) {
-    EPIS_NR06.forEach((nome) => {
-      const opt = document.createElement("option");
-      opt.value = nome;
-      datalist.appendChild(opt);
-    });
-  }
-
-  const atualizarVisibilidadeCa = () => {
-    campoCa.hidden = selTipo.value !== "epi";
+  // Popula as listas de sugestões (o técnico pode escolher ou digitar outro).
+  const preencherDatalist = (id, itens) => {
+    const dl = $("#" + id);
+    if (dl && !dl.childElementCount) {
+      itens.forEach((nome) => {
+        const opt = document.createElement("option");
+        opt.value = nome;
+        dl.appendChild(opt);
+      });
+    }
   };
-  selTipo?.addEventListener("change", atualizarVisibilidadeCa);
-  atualizarVisibilidadeCa();
+  preencherDatalist("lista-epi-nr06", EPIS_NR06);
+  preencherDatalist("lista-epc", EPCS_COMUNS);
+
+  const descricao = $("#epi_descricao");
+  // Ajusta CA (só EPI) e a lista de sugestões conforme o tipo.
+  const atualizarPorTipo = () => {
+    const ehEpi = selTipo.value === "epi";
+    campoCa.hidden = !ehEpi;
+    if (descricao) descricao.setAttribute("list", ehEpi ? "lista-epi-nr06" : "lista-epc");
+  };
+  selTipo?.addEventListener("change", atualizarPorTipo);
+  atualizarPorTipo();
 
   // Segmentados do formulário.
   ligarSegmentado("#epi_fornecido");
@@ -465,7 +473,7 @@ function inicializarFormEpi() {
     limparSegmentado("#epi_fornecido");
     limparSegmentado("#epi_em_uso");
     limparSegmentado("#epi_conservacao");
-    atualizarVisibilidadeCa();
+    atualizarPorTipo();
     renderizarEpis();
     $("#epi_descricao").focus();
 

@@ -1,5 +1,5 @@
 /* =========================================================
-   catalogo-epi.js — Principais EPIs (base NR-06 / Anexo I).
+   catalogo-epi.js — Principais EPIs (NR-06 / Anexo I) e EPCs comuns.
    Sugestões para o campo de descrição (o técnico pode digitar um
    EPI/EPC que não esteja na lista).
    [VERIFICAR VIGÊNCIA DA NORMA] antes de uso normativo formal.
@@ -50,4 +50,35 @@ export const EPIS_NR06 = [
   "Cinturão de segurança tipo paraquedista",
   "Talabarte de segurança",
   "Trava-quedas",
+];
+
+/** EPCs (Equipamentos de Proteção Coletiva) comuns — várias NRs. */
+export const EPCS_COMUNS = [
+  // Ruído
+  "Enclausuramento acústico",
+  "Barreira / tratamento acústico",
+  // Agentes químicos / ar
+  "Sistema de exaustão / ventilação local",
+  "Ventilação geral diluidora",
+  "Cabine / biombo de solda",
+  // Máquinas (NR-12)
+  "Proteção fixa/móvel de máquina",
+  "Dispositivo de parada de emergência",
+  "Sensor / cortina de luz",
+  // Quedas / altura
+  "Guarda-corpo e rodapé",
+  "Corrimão",
+  "Rede de proteção contra quedas",
+  "Piso antiderrapante",
+  // Elétrico (NR-10)
+  "Aterramento elétrico",
+  "Dispositivo diferencial residual (DR)",
+  "Bloqueio e etiquetagem (lockout/tagout)",
+  // Incêndio / emergência
+  "Extintor de incêndio",
+  "Sistema de detecção e alarme de incêndio",
+  "Chuveiro e lava-olhos de emergência",
+  "Kit de contenção de vazamentos",
+  // Sinalização
+  "Sinalização de segurança",
 ];
