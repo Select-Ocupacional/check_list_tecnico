@@ -74,7 +74,15 @@ function construirSeletorFuncoes() {
   funcoes.forEach((f) => {
     const opt = document.createElement("option");
     opt.value = f.id;
-    opt.textContent = f.quantidade != null ? `${f.nome} (${f.quantidade})` : f.nome;
+    const base = f.quantidade != null ? `${f.nome} (${f.quantidade})` : f.nome;
+    // Função já avaliada (com riscos ou EPIs) fica desabilitada para não ser
+    // reavaliada — exceto a que está ativa no momento (que continua editável).
+    if (funcaoAvaliada(f) && f.id !== funcaoAtivaId) {
+      opt.disabled = true;
+      opt.textContent = `✓ ${base} — já avaliada`;
+    } else {
+      opt.textContent = base;
+    }
     sel.appendChild(opt);
   });
 
@@ -84,6 +92,11 @@ function construirSeletorFuncoes() {
   }
   sel.value = funcaoAtivaId || "";
   sel.disabled = funcoes.length === 0;
+}
+
+/** Uma função é "avaliada" quando já tem ao menos um risco ou EPI/EPC registrado. */
+function funcaoAvaliada(f) {
+  return (f.avaliacoes_risco?.length || 0) > 0 || (f.verificacoes_epi_epc?.length || 0) > 0;
 }
 
 /* ---------- Riscos ---------- */
@@ -587,6 +600,7 @@ export function inicializarTelaRiscos() {
   });
   $("#funcao_ativa")?.addEventListener("change", (ev) => {
     funcaoAtivaId = ev.target.value || null;
+    construirSeletorFuncoes(); // re-marca a função anterior como "já avaliada"
     atualizarVisibilidade();
     renderizarRiscos();
     renderizarEpis();
