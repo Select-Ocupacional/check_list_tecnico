@@ -86,6 +86,7 @@
     <section id="tela-inicio" class="tela" aria-labelledby="titulo-inicio" hidden>
       <div class="usuario-bar">
         <span id="usuario-email" class="usuario-bar__email"></span>
+        <button type="button" id="btn-abrir-admin" class="btn btn--secundario" hidden>🛠 Painel Admin</button>
         <button type="button" id="btn-sair" class="btn btn--fantasma">Sair</button>
       </div>
       <div class="sync-bar">
@@ -99,6 +100,46 @@
       <p class="tela__ajuda">Continue uma visita salva ou inicie uma nova. Tudo fica salvo neste dispositivo e funciona offline.</p>
       <ul id="lista-visitas" class="lista-visitas" aria-live="polite"></ul>
       <p id="visitas-vazio" class="lista-vazia">Nenhuma visita salva ainda. Toque em “Nova visita” para começar.</p>
+    </section>
+
+    <!-- ============ PAINEL ADMINISTRATIVO (somente papel admin) ============ -->
+    <section id="tela-admin" class="tela" aria-labelledby="titulo-admin" hidden>
+      <div class="usuario-bar">
+        <button type="button" id="btn-admin-voltar" class="btn btn--fantasma">‹ Minhas visitas</button>
+        <button type="button" id="btn-admin-atualizar" class="btn btn--secundario">Atualizar</button>
+      </div>
+      <h2 id="titulo-admin" class="tela__titulo">Painel administrativo</h2>
+      <p class="tela__ajuda">Visão de todas as visitas dos técnicos e gestão de papéis. Requer conexão.</p>
+
+      <div class="admin-abas" role="tablist" aria-label="Seções do painel">
+        <button type="button" class="admin-aba admin-aba--ativa" data-aba="visitas" role="tab" aria-selected="true">Visitas</button>
+        <button type="button" class="admin-aba" data-aba="usuarios" role="tab" aria-selected="false">Usuários</button>
+      </div>
+
+      <!-- Aba: Visitas (todas) -->
+      <div id="admin-painel-visitas" class="admin-painel">
+        <div class="admin-filtros">
+          <input type="search" id="admin-busca" placeholder="Buscar por cliente…" autocomplete="off" aria-label="Buscar por cliente" />
+          <select id="admin-filtro-tecnico" aria-label="Filtrar por técnico">
+            <option value="">Todos os técnicos</option>
+          </select>
+          <select id="admin-filtro-status" aria-label="Filtrar por status">
+            <option value="">Todos os status</option>
+            <option value="rascunho">Rascunho</option>
+            <option value="concluida">Concluída</option>
+          </select>
+        </div>
+        <p id="admin-visitas-resumo" class="admin-resumo" aria-live="polite"></p>
+        <ul id="admin-lista-visitas" class="lista-visitas" aria-live="polite"></ul>
+        <p id="admin-visitas-vazio" class="lista-vazia" hidden>Nenhuma visita encontrada.</p>
+      </div>
+
+      <!-- Aba: Usuários (papéis) -->
+      <div id="admin-painel-usuarios" class="admin-painel" hidden>
+        <p class="tela__ajuda">Administradores enxergam todas as visitas; técnicos, apenas as próprias.</p>
+        <ul id="admin-lista-usuarios" class="lista-visitas" aria-live="polite"></ul>
+        <p id="admin-usuarios-vazio" class="lista-vazia" hidden>Nenhum usuário encontrado.</p>
+      </div>
     </section>
 
     <!-- ============ TELA 1 — IDENTIFICAÇÃO ============ -->

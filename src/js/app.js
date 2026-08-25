@@ -48,6 +48,15 @@ import {
   sair,
 } from "./auth.js";
 import { sincronizar, contarPendentes, excluirVisitaRemota } from "./sync.js";
+import {
+  obterPapel,
+  ehAdmin,
+  limparPapel,
+  listarTodasVisitas,
+  listarPerfis,
+  definirPapel,
+  abrirVisitaRemotaParaEdicao,
+} from "./admin.js";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -168,11 +177,242 @@ async function sincronizarAgora() {
   }
 }
 
+/* ---------- Painel Administrativo ---------- */
+
+let adminVisitas = [];
+let adminPerfis = [];
+
+/** Nome do técnico de uma visita (perfil → fallback ao nome embutido em dados). */
+function nomeTecnico(item) {
+  const perfil = adminPerfis.find((p) => p.user_id === item.tecnico_id);
+  return perfil?.nome || item.dados?.tecnico?.nome || "(técnico sem nome)";
+}
+
+/** Abre o Painel Admin e carrega os dados do servidor. */
+async function mostrarAdmin() {
+  $("#tela-inicio").hidden = true;
+  $("#tela-admin").hidden = false;
+  btnInicio.hidden = true;
+  window.scrollTo({ top: 0 });
+  await carregarAdmin();
+}
+
+/** Fecha o Painel Admin e volta à lista de visitas do usuário. */
+async function fecharAdmin() {
+  $("#tela-admin").hidden = true;
+  await mostrarInicio();
+}
+
+/** Busca visitas + perfis no servidor e (re)desenha as duas abas. */
+async function carregarAdmin() {
+  const resumo = $("#admin-visitas-resumo");
+  if (!navigator.onLine) {
+    if (resumo) resumo.textContent = "Sem conexão — o painel precisa de internet para carregar.";
+    return;
+  }
+  if (resumo) resumo.textContent = "Carregando…";
+  try {
+    [adminVisitas, adminPerfis] = await Promise.all([listarTodasVisitas(), listarPerfis()]);
+  } catch (e) {
+    console.warn("Falha ao carregar o painel admin:", e);
+    if (resumo) resumo.textContent = "Falha ao carregar. Tente novamente.";
+    return;
+  }
+  preencherFiltroTecnicos();
+  renderizarAdminVisitas();
+  renderizarAdminUsuarios();
+}
+
+/** Popula o seletor de técnicos com quem tem visitas. */
+function preencherFiltroTecnicos() {
+  const sel = $("#admin-filtro-tecnico");
+  if (!sel) return;
+  const atual = sel.value;
+  const ids = [...new Set(adminVisitas.map((v) => v.tecnico_id))];
+  sel.innerHTML = '<option value="">Todos os técnicos</option>';
+  ids.forEach((id) => {
+    const opt = document.createElement("option");
+    opt.value = id;
+    opt.textContent = nomeTecnico({ tecnico_id: id, dados: adminVisitas.find((v) => v.tecnico_id === id)?.dados });
+    sel.appendChild(opt);
+  });
+  sel.value = atual; // preserva a seleção se ainda existir
+}
+
+/** Aplica os filtros e desenha a lista de todas as visitas. */
+function renderizarAdminVisitas() {
+  const lista = $("#admin-lista-visitas");
+  const vazio = $("#admin-visitas-vazio");
+  const resumo = $("#admin-visitas-resumo");
+  if (!lista) return;
+
+  const termo = ($("#admin-busca")?.value || "").trim().toLowerCase();
+  const fTecnico = $("#admin-filtro-tecnico")?.value || "";
+  const fStatus = $("#admin-filtro-status")?.value || "";
+
+  const filtradas = adminVisitas.filter((v) => {
+    if (fTecnico && v.tecnico_id !== fTecnico) return false;
+    if (fStatus && v.status !== fStatus) return false;
+    if (termo && !(v.cliente_razao || "").toLowerCase().includes(termo)) return false;
+    return true;
+  });
+
+  lista.innerHTML = "";
+  if (vazio) vazio.hidden = filtradas.length > 0;
+  if (resumo) resumo.textContent = `${filtradas.length} de ${adminVisitas.length} visita(s).`;
+
+  filtradas.forEach((v) => {
+    const li = document.createElement("li");
+    li.className = "visita-card";
+
+    const info = document.createElement("div");
+    info.className = "visita-card__abrir";
+
+    const titulo = document.createElement("span");
+    titulo.className = "visita-card__titulo";
+    titulo.textContent = v.cliente_razao || "(sem razão social)";
+
+    const meta = document.createElement("span");
+    meta.className = "visita-card__meta";
+    meta.textContent = `${nomeTecnico(v)} · ${formatarData(v.data_visita)} · ${v.dados?.setores?.length || 0} setor(es)`;
+
+    const badge = document.createElement("span");
+    badge.className = `badge badge--${v.status}`;
+    badge.textContent = STATUS_ROTULO[v.status] || v.status;
+
+    info.append(titulo, meta, badge);
+
+    const relatorio = document.createElement("button");
+    relatorio.type = "button";
+    relatorio.className = "visita-card__relatorio";
+    relatorio.setAttribute("aria-label", "Gerar relatório (PDF)");
+    relatorio.title = "Gerar relatório (PDF)";
+    relatorio.textContent = "⎙";
+    relatorio.addEventListener("click", () => gerarRelatorio(v.dados));
+
+    const editar = document.createElement("button");
+    editar.type = "button";
+    editar.className = "visita-card__relatorio";
+    editar.setAttribute("aria-label", "Editar visita");
+    editar.title = "Editar visita";
+    editar.textContent = "✎";
+    editar.addEventListener("click", async () => {
+      await abrirVisitaRemotaParaEdicao(v.dados);
+      await abrirVisita(v.id);
+      $("#tela-admin").hidden = true;
+      entrarWizard();
+    });
+
+    const excluir = document.createElement("button");
+    excluir.type = "button";
+    excluir.className = "visita-card__excluir";
+    excluir.setAttribute("aria-label", "Excluir visita");
+    excluir.textContent = "✕";
+    excluir.addEventListener("click", async () => {
+      if (!confirm(`Excluir a visita de "${v.cliente_razao || "sem razão social"}" (técnico ${nomeTecnico(v)})? Esta ação não pode ser desfeita.`)) return;
+      const ok = await excluirVisitaRemota(v.id);
+      if (!ok) { alert("Não foi possível excluir no servidor."); return; }
+      await excluirVisita(v.id); // remove a cópia local, se houver
+      adminVisitas = adminVisitas.filter((x) => x.id !== v.id);
+      renderizarAdminVisitas();
+    });
+
+    li.append(info, relatorio, editar, excluir);
+    lista.appendChild(li);
+  });
+}
+
+/** Desenha a aba de usuários com contagem de visitas e gestão de papéis. */
+function renderizarAdminUsuarios() {
+  const lista = $("#admin-lista-usuarios");
+  const vazio = $("#admin-usuarios-vazio");
+  if (!lista) return;
+  lista.innerHTML = "";
+  if (vazio) vazio.hidden = adminPerfis.length > 0;
+
+  const meuId = usuarioAtual()?.id;
+
+  adminPerfis.forEach((p) => {
+    const n = adminVisitas.filter((v) => v.tecnico_id === p.user_id).length;
+    const li = document.createElement("li");
+    li.className = "visita-card";
+
+    const info = document.createElement("div");
+    info.className = "visita-card__abrir";
+
+    const titulo = document.createElement("span");
+    titulo.className = "visita-card__titulo";
+    titulo.textContent = p.nome || "(sem nome)";
+
+    const meta = document.createElement("span");
+    meta.className = "visita-card__meta";
+    meta.textContent = `${n} visita(s)${p.user_id === meuId ? " · você" : ""}`;
+
+    const badge = document.createElement("span");
+    badge.className = `badge badge--${p.papel === "admin" ? "concluida" : "rascunho"}`;
+    badge.textContent = p.papel === "admin" ? "Admin" : "Técnico";
+
+    info.append(titulo, meta, badge);
+
+    const alternar = document.createElement("button");
+    alternar.type = "button";
+    alternar.className = "btn btn--secundario admin-papel-btn";
+    const novoPapel = p.papel === "admin" ? "tecnico" : "admin";
+    alternar.textContent = p.papel === "admin" ? "Tornar técnico" : "Tornar admin";
+    alternar.addEventListener("click", async () => {
+      if (p.user_id === meuId && novoPapel === "tecnico" &&
+          !confirm("Você está removendo o seu próprio acesso de administrador. Continuar?")) return;
+      alternar.disabled = true;
+      try {
+        await definirPapel(p.user_id, novoPapel);
+        p.papel = novoPapel;
+        if (p.user_id === meuId) {
+          await obterPapel(true); // reavalia o próprio papel
+          $("#btn-abrir-admin").hidden = !ehAdmin();
+        }
+        renderizarAdminUsuarios();
+      } catch (e) {
+        console.warn("Falha ao alterar papel:", e);
+        alert("Não foi possível alterar o papel. Verifique se a policy de admin foi aplicada no banco.");
+        alternar.disabled = false;
+      }
+    });
+
+    li.append(info, alternar);
+    lista.appendChild(li);
+  });
+}
+
+/** Liga os controles do Painel Admin (uma vez, no boot). */
+function inicializarAdmin() {
+  $("#btn-abrir-admin")?.addEventListener("click", () => mostrarAdmin());
+  $("#btn-admin-voltar")?.addEventListener("click", () => fecharAdmin());
+  $("#btn-admin-atualizar")?.addEventListener("click", () => carregarAdmin());
+
+  $("#admin-busca")?.addEventListener("input", renderizarAdminVisitas);
+  $("#admin-filtro-tecnico")?.addEventListener("change", renderizarAdminVisitas);
+  $("#admin-filtro-status")?.addEventListener("change", renderizarAdminVisitas);
+
+  document.querySelectorAll(".admin-aba").forEach((aba) => {
+    aba.addEventListener("click", () => {
+      document.querySelectorAll(".admin-aba").forEach((a) => {
+        const ativa = a === aba;
+        a.classList.toggle("admin-aba--ativa", ativa);
+        a.setAttribute("aria-selected", ativa ? "true" : "false");
+      });
+      const alvo = aba.dataset.aba;
+      $("#admin-painel-visitas").hidden = alvo !== "visitas";
+      $("#admin-painel-usuarios").hidden = alvo !== "usuarios";
+    });
+  });
+}
+
 /** Exibe a tela inicial e esconde o assistente. */
 async function mostrarInicio() {
   await renderizarListaVisitas();
   await atualizarStatusSync();
   $("#tela-inicio").hidden = false;
+  $("#tela-admin").hidden = true;
   PASSOS.forEach((t) => ($("#tela-" + t).hidden = true));
   $("#passos").hidden = true;
   $("#rodape-nav").hidden = true;
@@ -248,6 +488,12 @@ async function entrarApp() {
   await migrarLocalStorage();
   await mostrarInicio();
   sincronizarAgora(); // sincroniza em segundo plano ao entrar
+
+  // Resolve o papel e revela o Painel Admin apenas para administradores.
+  obterPapel().then(() => {
+    const btn = $("#btn-abrir-admin");
+    if (btn) btn.hidden = !ehAdmin();
+  });
 }
 
 function inicializarLogin() {
@@ -298,6 +544,7 @@ function inicializarLogin() {
 
   $("#btn-sair").addEventListener("click", () => {
     sair();
+    limparPapel();
     location.reload();
   });
 }
@@ -312,6 +559,7 @@ async function inicializar() {
   inicializarTelaGhe();
   inicializarTelaTreinamentos();
   inicializarTelaEncerramento();
+  inicializarAdmin();
 
   btnAvancar.addEventListener("click", () => {
     const passoAtual = PASSOS[indiceAtual];

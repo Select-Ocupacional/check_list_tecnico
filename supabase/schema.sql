@@ -30,9 +30,13 @@ drop policy if exists "perfil: ler proprio ou admin" on public.perfis;
 create policy "perfil: ler proprio ou admin" on public.perfis
   for select using (user_id = auth.uid() or public.is_admin());
 
+-- Painel Admin: o próprio usuário atualiza seu perfil; admin atualiza qualquer
+-- perfil (gestão de papéis técnico/admin).
 drop policy if exists "perfil: atualizar proprio" on public.perfis;
-create policy "perfil: atualizar proprio" on public.perfis
-  for update using (user_id = auth.uid());
+drop policy if exists "perfil: atualizar proprio ou admin" on public.perfis;
+create policy "perfil: atualizar proprio ou admin" on public.perfis
+  for update using (user_id = auth.uid() or public.is_admin())
+  with check (user_id = auth.uid() or public.is_admin());
 
 -- Cria o perfil automaticamente no cadastro de um novo usuário.
 create or replace function public.handle_new_user()
@@ -78,9 +82,12 @@ drop policy if exists "visita: inserir propria" on public.visitas;
 create policy "visita: inserir propria" on public.visitas
   for insert with check (tecnico_id = auth.uid());
 
+-- Técnico atualiza as próprias; admin atualiza qualquer visita (Painel Admin).
 drop policy if exists "visita: atualizar propria" on public.visitas;
-create policy "visita: atualizar propria" on public.visitas
-  for update using (tecnico_id = auth.uid()) with check (tecnico_id = auth.uid());
+drop policy if exists "visita: atualizar propria ou admin" on public.visitas;
+create policy "visita: atualizar propria ou admin" on public.visitas
+  for update using (tecnico_id = auth.uid() or public.is_admin())
+  with check (tecnico_id = auth.uid() or public.is_admin());
 
 drop policy if exists "visita: excluir propria ou admin" on public.visitas;
 create policy "visita: excluir propria ou admin" on public.visitas
