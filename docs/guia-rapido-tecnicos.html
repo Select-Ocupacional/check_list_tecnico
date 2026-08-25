@@ -1,0 +1,286 @@
+<title>Guia Rápido do Técnico</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+
+<style>
+  :root {
+    --navy: #0D1B3E;
+    --teal: #1BA89D;
+    --teal-escuro: #148077;
+    --ground: #EEF1F6;      /* neutro com leve viés navy */
+    --card: #FFFFFF;
+    --tinta: #131B2E;       /* quase-navy p/ texto */
+    --tinta-suave: #56607A; /* secundário */
+    --linha: #DDE3EC;
+    --realce-bg: #E8F6F4;   /* teal bem claro p/ caixas */
+    --sombra: 0 1px 2px rgba(13,27,62,.06), 0 8px 24px rgba(13,27,62,.07);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --navy: #0A1330;
+      --teal: #2FC4B7;
+      --teal-escuro: #23A093;
+      --ground: #0A1020;
+      --card: #121A2E;
+      --tinta: #EAEEF6;
+      --tinta-suave: #9AA5BC;
+      --linha: #26314B;
+      --realce-bg: #10322F;
+      --sombra: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --navy: #0A1330;
+    --teal: #2FC4B7;
+    --teal-escuro: #23A093;
+    --ground: #0A1020;
+    --card: #121A2E;
+    --tinta: #EAEEF6;
+    --tinta-suave: #9AA5BC;
+    --linha: #26314B;
+    --realce-bg: #10322F;
+    --sombra: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--tinta);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .folha {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 20px 48px;
+  }
+
+  /* ---- Cabeçalho ---- */
+  .capa {
+    background: var(--navy);
+    color: #fff;
+    border-radius: 16px;
+    padding: 28px 26px;
+    box-shadow: var(--sombra);
+    position: relative;
+    overflow: hidden;
+  }
+  .capa::after { /* faixa teal discreta */
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--teal), transparent 70%);
+  }
+  .marca {
+    display: flex; align-items: center; gap: 10px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: .72rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #9FB2D6;
+  }
+  .marca__selo {
+    display: inline-grid; place-items: center;
+    width: 30px; height: 30px;
+    border: 1.5px solid var(--teal);
+    border-radius: 8px;
+    color: var(--teal);
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+  .capa h1 {
+    font-size: clamp(1.55rem, 5vw, 2.1rem);
+    font-weight: 700;
+    line-height: 1.12;
+    text-wrap: balance;
+    margin: 16px 0 6px;
+  }
+  .capa p { margin: 0; color: #C4D0E6; font-size: 1rem; }
+  .url {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 18px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 10px;
+    padding: 9px 13px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: .9rem;
+    font-weight: 500;
+    color: #fff;
+    word-break: break-all;
+  }
+  .url span { color: var(--teal); }
+
+  /* ---- Fases ---- */
+  .fases { display: grid; gap: 16px; margin-top: 22px; }
+  .fase {
+    background: var(--card);
+    border: 1px solid var(--linha);
+    border-radius: 14px;
+    padding: 20px 20px 18px;
+    box-shadow: var(--sombra);
+  }
+  .fase__cab { display: flex; align-items: center; gap: 13px; margin-bottom: 14px; }
+  .num {
+    flex-shrink: 0;
+    width: 34px; height: 34px;
+    display: grid; place-items: center;
+    background: var(--teal);
+    color: #04201d;
+    border-radius: 9px;
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+  .fase__tit { margin: 0; font-size: 1.16rem; font-weight: 600; line-height: 1.15; }
+  .fase__ctx {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .68rem; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--teal-escuro);
+    display: block; margin-top: 2px;
+  }
+  ol.passos, ul.limpa { margin: 0; padding: 0; list-style: none; display: grid; gap: 11px; }
+  .passos li { display: flex; gap: 11px; align-items: flex-start; }
+  .marca-check {
+    flex-shrink: 0; margin-top: 2px;
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--teal);
+    display: grid; place-items: center;
+    color: var(--teal); font-size: .7rem; font-weight: 700;
+  }
+  .passos b { font-weight: 600; }
+  .passos small { color: var(--tinta-suave); display: block; font-size: .86rem; }
+
+  /* ---- Caixa "bom saber" ---- */
+  .saber {
+    margin-top: 20px;
+    background: var(--realce-bg);
+    border: 1px solid color-mix(in srgb, var(--teal) 30%, transparent);
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+  .saber h2 {
+    margin: 0 0 12px;
+    font-size: .74rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--teal-escuro);
+    font-family: "IBM Plex Mono", monospace; font-weight: 600;
+  }
+  .saber ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+  .saber li { display: flex; gap: 10px; font-size: .95rem; }
+  .saber li::before { content: "▸"; color: var(--teal); font-weight: 700; }
+
+  /* ---- Rodapé ---- */
+  .rodape {
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px solid var(--linha);
+    display: flex; flex-wrap: wrap; gap: 8px 16px;
+    justify-content: space-between;
+    color: var(--tinta-suave);
+    font-size: .82rem;
+  }
+  .rodape strong { color: var(--tinta); font-weight: 600; }
+  .aviso { display: flex; align-items: center; gap: 7px; }
+  .aviso svg { flex-shrink: 0; }
+
+  @media (max-width: 520px) {
+    .folha { padding: 16px 14px 36px; }
+    .capa { padding: 22px 20px; }
+    .fase { padding: 17px 16px; }
+  }
+
+  @media print {
+    body { background: #fff; }
+    .folha { max-width: 100%; padding: 0; }
+    .capa, .fase, .saber { box-shadow: none; }
+    .fase, .saber, .capa { break-inside: avoid; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="folha">
+
+  <header class="capa">
+    <div class="marca">
+      <span class="marca__selo">SO</span>
+      Select Ocupacional · SST
+    </div>
+    <h1>Guia rápido do técnico</h1>
+    <p>Check-list de Visita Técnica — como usar em campo, com ou sem internet.</p>
+    <div class="url">🔗&nbsp; <span>https://</span>check-list-tecnico.pages.dev</div>
+  </header>
+
+  <section class="fases">
+
+    <article class="fase">
+      <div class="fase__cab">
+        <div class="num">1</div>
+        <div>
+          <h2 class="fase__tit">Prepare o aparelho</h2>
+          <span class="fase__ctx">Com internet · antes de sair</span>
+        </div>
+      </div>
+      <ol class="passos">
+        <li><span class="marca-check">✓</span><div><b>Abra o link</b> no navegador do celular e <b>faça login</b> com seu e-mail e senha.<small>O primeiro acesso precisa de internet — é ele que guarda o app no aparelho.</small></div></li>
+        <li><span class="marca-check">✓</span><div><b>Adicione à tela inicial.</b><small>No menu do navegador: “Adicionar à tela de início” / “Instalar app”. Vira um app em tela cheia.</small></div></li>
+        <li><span class="marca-check">✓</span><div><b>Abra pelo ícone uma vez</b>, ainda com internet.<small>Garante que todos os arquivos foram baixados para uso offline.</small></div></li>
+      </ol>
+    </article>
+
+    <article class="fase">
+      <div class="fase__cab">
+        <div class="num">2</div>
+        <div>
+          <h2 class="fase__tit">Faça a visita</h2>
+          <span class="fase__ctx">Em campo · sem internet</span>
+        </div>
+      </div>
+      <ol class="passos">
+        <li><span class="marca-check">✓</span><div><b>Abra o app pelo ícone</b> e preencha o check-list normalmente.<small>Identificação, setores e funções, riscos e EPIs, GHE, treinamentos e encerramento.</small></div></li>
+        <li><span class="marca-check">✓</span><div><b>Tire as fotos</b> das evidências e colha as <b>assinaturas</b> na própria tela.</div></li>
+        <li><span class="marca-check">✓</span><div>Tudo é <b>salvo no aparelho</b> a cada passo — funciona 100% offline.<small>Você pode fechar e reabrir o app sem perder nada.</small></div></li>
+      </ol>
+    </article>
+
+    <article class="fase">
+      <div class="fase__cab">
+        <div class="num">3</div>
+        <div>
+          <h2 class="fase__tit">Envie os dados</h2>
+          <span class="fase__ctx">Ao recuperar o sinal</span>
+        </div>
+      </div>
+      <ol class="passos">
+        <li><span class="marca-check">✓</span><div>De volta a uma área com internet, abra o app.<small>Ele sincroniza sozinho ao reconectar.</small></div></li>
+        <li><span class="marca-check">✓</span><div>Se quiser garantir, toque em <b>“Sincronizar”</b> na tela inicial.<small>O indicador mostra “Tudo sincronizado” quando terminar.</small></div></li>
+      </ol>
+    </article>
+
+  </section>
+
+  <section class="saber">
+    <h2>Bom saber</h2>
+    <ul>
+      <li>O <b>primeiro login</b> e a <b>instalação</b> só precisam ser feitos uma vez por aparelho.</li>
+      <li>Com sinal fraco, o app abre pelo cache em segundos — não trava esperando a rede.</li>
+      <li>As visitas ficam salvas no aparelho até serem sincronizadas. Sincronize sempre que possível.</li>
+      <li>Perdeu o acesso ou a senha? Fale com o administrador — não crie uma segunda conta.</li>
+    </ul>
+  </section>
+
+  <footer class="rodape">
+    <span class="aviso">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span>Dados de trabalhadores são <strong>sigilosos</strong> (LGPD). Use e compartilhe apenas no escopo autorizado.</span>
+    </span>
+    <span>Select Ocupacional — Dept. Técnico</span>
+  </footer>
+
+</div>
