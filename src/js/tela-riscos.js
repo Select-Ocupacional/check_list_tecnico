@@ -28,6 +28,8 @@ const $ = (sel, ctx = document) => ctx.querySelector(sel);
 // Setor e função atualmente em avaliação nesta tela.
 let setorAtivoId = null;
 let funcaoAtivaId = null;
+// Quando true, funções já avaliadas voltam a ser selecionáveis (para correção).
+let editarAvaliadas = false;
 
 const NIVEIS = [
   { v: "nao_avaliado", t: "Não avaliado" },
@@ -76,12 +78,14 @@ function construirSeletorFuncoes() {
     opt.value = f.id;
     const base = f.quantidade != null ? `${f.nome} (${f.quantidade})` : f.nome;
     // Função já avaliada (com riscos ou EPIs) fica desabilitada para não ser
-    // reavaliada — exceto a que está ativa no momento (que continua editável).
-    if (funcaoAvaliada(f) && f.id !== funcaoAtivaId) {
-      opt.disabled = true;
+    // reavaliada — exceto a que está ativa no momento (que continua editável)
+    // ou quando o modo "editar avaliadas" está ligado. Sempre marcada com "✓".
+    const avaliada = funcaoAvaliada(f);
+    if (avaliada && f.id !== funcaoAtivaId) {
       opt.textContent = `✓ ${base} — já avaliada`;
+      opt.disabled = !editarAvaliadas;
     } else {
-      opt.textContent = base;
+      opt.textContent = avaliada ? `✓ ${base}` : base;
     }
     sel.appendChild(opt);
   });
@@ -604,6 +608,12 @@ export function inicializarTelaRiscos() {
     atualizarVisibilidade();
     renderizarRiscos();
     renderizarEpis();
+  });
+
+  // Alterna a possibilidade de reabrir funções já avaliadas para correção.
+  $("#editar_avaliadas")?.addEventListener("change", (ev) => {
+    editarAvaliadas = ev.target.checked;
+    construirSeletorFuncoes();
   });
 
   // "Incluir outra função / setor": volta ao topo (seletores) para avaliar a próxima.

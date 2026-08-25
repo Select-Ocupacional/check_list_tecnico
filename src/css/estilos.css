@@ -791,3 +791,15 @@ input.invalido, select.invalido, textarea.invalido {
   .campo-linha .campo--grande { flex: 3; }
   .app-header__titulo { font-size: 1.1rem; }
 }
+
+/* Alternador "Mostrar funções já avaliadas (para editar)" — Tela 3 */
+.check-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--cinza-medio, #6B7280);
+  cursor: pointer;
+}
+.check-inline input { width: 16px; height: 16px; }
