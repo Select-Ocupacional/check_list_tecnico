@@ -8,7 +8,7 @@
    para forçar a atualização do cache nos dispositivos.
    ========================================================= */
 
-const CACHE_VERSAO = "clt-v29";
+const CACHE_VERSAO = "clt-v30";
 
 // App shell — tudo que o app precisa para abrir offline.
 const ASSETS = [
@@ -58,10 +58,46 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Busca: "rede primeiro" para o app shell dinâmico (HTML/JS/CSS) — garante a
-// versão mais recente quando online e evita misturar arquivos de versões
-// diferentes após um deploy; cai no cache quando offline. Demais assets
-// (imagens, ícones, manifest, fontes) usam "cache primeiro" por performance.
+// Tempo máximo de espera pela rede no app shell antes de servir o cache.
+// Protege o uso em campo: com sinal fraco, o app não trava esperando a rede.
+const REDE_TIMEOUT_MS = 3000;
+
+/**
+ * "Rede primeiro" com timeout, para HTML/JS/CSS:
+ * - online e rápido: usa a rede e atualiza o cache (deploy entra no 1º reload);
+ * - online e lento (>3s): serve o cache na hora e atualiza em 2º plano;
+ * - offline: cai no cache (navegação → index.html).
+ * O 1º acesso (sem cache) sempre aguarda a rede, pois exige internet.
+ */
+async function redePrimeiroComTimeout(req) {
+  const cache = await caches.open(CACHE_VERSAO);
+  const cacheado = await cache.match(req);
+
+  const rede = fetch(req).then((resp) => {
+    if (resp && resp.ok && resp.type === "basic") cache.put(req, resp.clone());
+    return resp;
+  });
+
+  if (!cacheado) {
+    // Sem cópia local: primeiro acesso precisa da rede.
+    try {
+      return await rede;
+    } catch {
+      return req.mode === "navigate" ? cache.match("./index.html") : Response.error();
+    }
+  }
+
+  // Com cópia local: usa a rede, mas no máximo REDE_TIMEOUT_MS; senão, o cache.
+  try {
+    return await Promise.race([
+      rede,
+      new Promise((resolve) => setTimeout(() => resolve(cacheado), REDE_TIMEOUT_MS)),
+    ]);
+  } catch {
+    return cacheado; // rede falhou (offline): serve o cache
+  }
+}
+
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
@@ -73,26 +109,11 @@ self.addEventListener("fetch", (event) => {
   const dinamico = req.mode === "navigate" || /\.(?:js|css|html)$/.test(url.pathname);
 
   if (dinamico) {
-    // Rede primeiro: atualiza o cache a cada sucesso; offline cai no cache.
-    event.respondWith(
-      fetch(req)
-        .then((resp) => {
-          if (resp && resp.ok && resp.type === "basic") {
-            const copia = resp.clone();
-            caches.open(CACHE_VERSAO).then((cache) => cache.put(req, copia));
-          }
-          return resp;
-        })
-        .catch(() =>
-          caches.match(req).then((cacheado) =>
-            cacheado || (req.mode === "navigate" ? caches.match("./index.html") : undefined)
-          )
-        )
-    );
+    event.respondWith(redePrimeiroComTimeout(req));
     return;
   }
 
-  // Cache primeiro: responde do cache; se não houver, busca na rede e guarda.
+  // Demais assets (imagens, ícones, manifest, fontes): "cache primeiro".
   event.respondWith(
     caches.match(req).then((cacheado) => {
       if (cacheado) return cacheado;
