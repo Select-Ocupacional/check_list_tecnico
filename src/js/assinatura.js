@@ -15,6 +15,7 @@ export function criarPadAssinatura(canvas) {
   let desenhando = false;
   let vazio = true;
   let ultimo = null;
+  let modificado = false; // true quando o usuário desenhou/limpou após carregar
 
   /** Ajusta o buffer do canvas à densidade da tela. Deve rodar com o canvas visível. */
   function redimensionar() {
@@ -53,6 +54,7 @@ export function criarPadAssinatura(canvas) {
     ctx.stroke();
     ultimo = p;
     vazio = false;
+    modificado = true;
   }
 
   function terminar() {
@@ -70,12 +72,38 @@ export function criarPadAssinatura(canvas) {
   function limpar() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     vazio = true;
+    modificado = true;
+  }
+
+  /**
+   * Desenha uma assinatura já existente (Data URL ou URL) sobre o canvas, para
+   * edição de uma visita salva. Carregar não conta como modificação — assim, se
+   * o usuário não redesenhar, a referência original pode ser preservada.
+   * @param {string} fonte Data URL ou URL da imagem da assinatura.
+   */
+  function carregar(fonte) {
+    if (!fonte) return;
+    const img = new Image();
+    img.crossOrigin = "anonymous"; // evita "tainting" ao reexportar (URLs remotas com CORS)
+    img.onload = () => {
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width || canvas.width;
+      const h = rect.height || canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      vazio = false;
+      modificado = false;
+    };
+    img.onerror = () => { /* imagem indisponível: mantém o pad vazio */ };
+    img.src = fonte;
   }
 
   return {
     limpar,
+    carregar,
     redimensionar,
     estaVazio: () => vazio,
+    foiModificado: () => modificado,
     paraDataURL: () => canvas.toDataURL("image/png"),
   };
 }

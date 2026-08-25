@@ -14,12 +14,16 @@ import {
 import { criarPadAssinatura } from "./assinatura.js";
 import { validarEncerramento } from "./validacao.js";
 import { gerarRelatorio } from "./relatorio.js";
+import { resolverRef } from "./storage.js";
 
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
 
 let padResponsavel = null;
 let padTecnico = null;
 let finalizada = false;
+// Referências das assinaturas já salvas, para preservá-las se o pad não for redesenhado.
+let refTecnicoOriginal = null;
+let refResponsavelOriginal = null;
 
 /* ---------- Inicialização ---------- */
 
@@ -122,6 +126,22 @@ export function renderizarTelaEncerramento() {
     v.hora_fim = v.hora_fim || horaAtual();
     $("#hora_fim").value = v.hora_fim;
   }
+
+  // Ao editar uma visita salva: restaura os dados do responsável e as assinaturas.
+  const assinaturas = v.assinaturas || [];
+  const doResponsavel = assinaturas.find((a) => a.papel === "responsavel_empresa");
+  const doTecnico = assinaturas.find((a) => a.papel === "tecnico");
+
+  if (doResponsavel) {
+    if (!$("#responsavel_nome").value) $("#responsavel_nome").value = doResponsavel.nome || "";
+    if (!$("#responsavel_cargo").value) $("#responsavel_cargo").value = doResponsavel.cargo || "";
+  }
+
+  // Carrega as imagens das assinaturas nos respectivos pads (Data URL, cache ou URL assinada).
+  refTecnicoOriginal = doTecnico?.assinatura_ref || null;
+  refResponsavelOriginal = doResponsavel?.assinatura_ref || null;
+  if (refTecnicoOriginal) resolverRef(refTecnicoOriginal).then((url) => padTecnico?.carregar(url));
+  if (refResponsavelOriginal) resolverRef(refResponsavelOriginal).then((url) => padResponsavel?.carregar(url));
 }
 
 /** Restaura a tela para o estado inicial (ao abrir/nova visita). */
@@ -132,6 +152,8 @@ export function resetarEncerramento() {
   $("#encerramento-sucesso").hidden = true;
   padResponsavel?.limpar();
   padTecnico?.limpar();
+  refTecnicoOriginal = null;
+  refResponsavelOriginal = null;
   limparErros();
 }
 
@@ -182,7 +204,9 @@ export function finalizarVisita() {
       papel: "tecnico",
       nome: estado.visita.tecnico.nome,
       cargo: estado.visita.tecnico.funcao || undefined,
-      assinatura_ref: padTecnico.paraDataURL(),
+      // Preserva a assinatura salva se o pad não foi redesenhado ao editar.
+      assinatura_ref: (!padTecnico.foiModificado() && refTecnicoOriginal)
+        ? refTecnicoOriginal : padTecnico.paraDataURL(),
       assinado_em: agora,
     }),
     limparIndefinidos({
@@ -190,7 +214,8 @@ export function finalizarVisita() {
       papel: "responsavel_empresa",
       nome: responsavelNome.trim(),
       cargo: $("#responsavel_cargo").value.trim() || undefined,
-      assinatura_ref: padResponsavel.paraDataURL(),
+      assinatura_ref: (!padResponsavel.foiModificado() && refResponsavelOriginal)
+        ? refResponsavelOriginal : padResponsavel.paraDataURL(),
       assinado_em: agora,
     }),
   ];
