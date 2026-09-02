@@ -12,8 +12,12 @@ import {
 } from "./estado.js";
 import { validarIdentificacao, formatarCnpj, formatarCep, formatarCnae, formatarTelefone, apenasDigitos } from "./validacao.js";
 import { grauPorCnae } from "./tabela-cnae-nr04.js";
+import { consultarCnpj } from "./cnpj.js";
 
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
+
+// Evita reconsultar o mesmo CNPJ repetidamente enquanto o técnico digita.
+let ultimoCnpjBuscado = "";
 
 /** Preenche os inputs a partir do estado (ao carregar rascunho). */
 function preencherFormulario() {
@@ -184,6 +188,57 @@ export function validarEComitar() {
   return true;
 }
 
+/* ---------- Preenchimento automático por CNPJ (Receita/BrasilAPI) ---------- */
+
+/** Define o texto de status da busca de CNPJ. */
+function statusCnpj(msg) {
+  const el = $("#cnpj-status");
+  if (el) el.textContent = msg || "";
+}
+
+/** Preenche os campos da empresa com os dados da Receita e persiste. */
+function preencherDaReceita(dados) {
+  const set = (id, val) => { const el = $("#" + id); if (el && val != null && val !== "") el.value = val; };
+  set("razao_social", dados.razao_social);
+  set("nome_fantasia", dados.nome_fantasia);
+  set("logradouro", dados.logradouro);
+  set("numero", dados.numero);
+  set("bairro", dados.bairro);
+  if (dados.cep) set("cep", formatarCep(dados.cep));
+  set("municipio", dados.municipio);
+  if (dados.uf) set("uf", dados.uf.toUpperCase());
+
+  const cnaeEl = $("#cnae_principal");
+  if (cnaeEl && dados.cnae) {
+    cnaeEl.value = formatarCnae(dados.cnae);
+    cnaeEl.dispatchEvent(new Event("input", { bubbles: true })); // grau NR-04 + coleta + autosave
+  } else {
+    $("#razao_social")?.dispatchEvent(new Event("input", { bubbles: true })); // coleta + autosave
+  }
+}
+
+/** Consulta o CNPJ (14 dígitos) e preenche os dados da empresa. */
+async function buscarPreencherCnpj(cnpjBruto) {
+  const num = apenasDigitos(cnpjBruto);
+  if (num.length !== 14 || num === ultimoCnpjBuscado) return;
+  ultimoCnpjBuscado = num;
+  statusCnpj("Buscando dados na Receita…");
+  try {
+    const dados = await consultarCnpj(num);
+    if (!dados) { statusCnpj("CNPJ não encontrado — preencha manualmente."); return; }
+    preencherDaReceita(dados);
+    const inativa = dados.situacao && !/ATIVA/i.test(dados.situacao);
+    statusCnpj(inativa
+      ? `Dados preenchidos pela Receita — situação: ${dados.situacao}. Confira.`
+      : "Dados preenchidos pela Receita. Confira e ajuste se necessário.");
+  } catch (e) {
+    ultimoCnpjBuscado = ""; // permite nova tentativa
+    statusCnpj(e.code === "offline"
+      ? "Sem conexão — preencha os dados manualmente."
+      : "Não foi possível consultar o CNPJ — preencha manualmente.");
+  }
+}
+
 /** Inicializa listeners da Tela 1. */
 export function inicializarTelaIdentificacao() {
   preencherFormulario();
@@ -193,9 +248,12 @@ export function inicializarTelaIdentificacao() {
   // Evita que Enter em um campo submeta/recarregue a página (a navegação é pelo rodapé).
   form?.addEventListener("submit", (ev) => ev.preventDefault());
 
-  // Máscara viva de CNPJ.
+  // Máscara viva de CNPJ + preenchimento automático ao completar 14 dígitos.
   const cnpj = $("#cnpj");
-  cnpj?.addEventListener("input", () => { cnpj.value = formatarCnpj(cnpj.value); });
+  cnpj?.addEventListener("input", () => {
+    cnpj.value = formatarCnpj(cnpj.value);
+    if (apenasDigitos(cnpj.value).length === 14) buscarPreencherCnpj(cnpj.value);
+  });
 
   // UF sempre em maiúsculas.
   const uf = $("#uf");

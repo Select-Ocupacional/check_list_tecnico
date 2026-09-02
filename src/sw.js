@@ -8,7 +8,7 @@
    para forçar a atualização do cache nos dispositivos.
    ========================================================= */
 
-const CACHE_VERSAO = "clt-v34";
+const CACHE_VERSAO = "clt-v35";
 
 // App shell — tudo que o app precisa para abrir offline.
 const ASSETS = [
@@ -18,6 +18,7 @@ const ASSETS = [
   "./css/estilos.css",
   "./js/app.js",
   "./js/config.js",
+  "./js/cnpj.js",
   "./js/auth.js",
   "./js/sync.js",
   "./js/storage.js",
