@@ -14,7 +14,7 @@ import {
 
 // Chave do rascunho único da versão anterior (localStorage) — usada só na migração.
 const CHAVE_STORAGE_ANTIGA = "select_visita_tecnica_rascunho";
-const VERSAO_SCHEMA = "1.8.0";
+const VERSAO_SCHEMA = "1.9.0";
 
 /** Gera um UUID v4 (usa crypto nativo quando disponível). */
 export function gerarUuid() {

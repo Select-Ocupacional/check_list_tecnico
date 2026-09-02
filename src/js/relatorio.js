@@ -106,12 +106,13 @@ function blocoRiscos(v) {
             <h3>${esc(s.nome)} — ${esc(f.nome)}</h3>
             ${riscos.length ? `
               <table class="rel-tab">
-                <thead><tr><th>Grupo</th><th>Agente</th><th>Nível</th><th>Quantificação</th><th>Observação</th></tr></thead>
+                <thead><tr><th>Grupo</th><th>Agente</th><th>Nível</th><th>Índice</th><th>Quantificação</th><th>Observação</th></tr></thead>
                 <tbody>
                   ${riscos.map((r) => {
                     const q = r.quantificacao;
                     const qtxt = q ? [q.data ? fmtData(q.data) : "", q.hora || "", q.equipamento ? esc(q.equipamento) : ""].filter(Boolean).join(" ") : "—";
-                    return `<tr><td>${esc(GRUPO[r.grupo] || r.grupo)}</td><td>${esc(r.agente)}</td><td>${esc(NIVEL[r.nivel_exposicao] || "—")}</td><td>${qtxt || "—"}</td><td>${esc(r.observacao || "—")}</td></tr>`;
+                    const itxt = Number.isFinite(r.indice) ? `${esc(String(r.indice))}${r.unidade ? " " + esc(r.unidade) : ""}` : "—";
+                    return `<tr><td>${esc(GRUPO[r.grupo] || r.grupo)}</td><td>${esc(r.agente)}</td><td>${esc(NIVEL[r.nivel_exposicao] || "—")}</td><td>${itxt}</td><td>${qtxt || "—"}</td><td>${esc(r.observacao || "—")}</td></tr>`;
                   }).join("")}
                 </tbody>
               </table>` : `<p class="rel-desc">Nenhum risco registrado.</p>`}

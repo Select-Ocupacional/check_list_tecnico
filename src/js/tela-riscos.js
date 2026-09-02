@@ -31,6 +31,13 @@ let funcaoAtivaId = null;
 // Quando true, funções já avaliadas voltam a ser selecionáveis (para correção).
 let editarAvaliadas = false;
 
+// Unidade sugerida do índice para os agentes comparados por valor no GHE.
+const UNIDADE_PADRAO = {
+  "Ruído contínuo ou intermitente": "dB(A)",
+  "Vibração de mãos e braços": "m/s²",
+  "Vibração de corpo inteiro": "m/s²",
+};
+
 const NIVEIS = [
   { v: "nao_avaliado", t: "Não avaliado" },
   { v: "baixo", t: "Baixo" },
@@ -144,6 +151,52 @@ function construirDetalheRisco(risco) {
   );
   campoObs.append(rotObs, obs);
 
+  // Índice medido/sabido (opcional): valor + unidade. Usado no agrupamento de
+  // GHE por valor exato (ruído contínuo/intermitente, vibrações e químicos).
+  const campoIndice = document.createElement("div");
+  campoIndice.className = "campo";
+  const rotInd = document.createElement("span");
+  rotInd.className = "rotulo-grupo";
+  rotInd.textContent = "Índice medido (opcional)";
+  const dicaInd = document.createElement("small");
+  dicaInd.className = "quant-dica";
+  dicaInd.textContent = "Valor medido ou conhecido. Agrupa o GHE por valor exato em ruído, vibrações e químicos.";
+
+  const linhaInd = document.createElement("div");
+  linhaInd.className = "quant-linha";
+  const inValor = document.createElement("input");
+  inValor.type = "number";
+  inValor.step = "any";
+  inValor.min = "0";
+  inValor.placeholder = "Valor (ex.: 85)";
+  inValor.value = Number.isFinite(risco.indice) ? String(risco.indice) : "";
+  inValor.setAttribute("aria-label", "Índice medido");
+
+  const inUnidade = document.createElement("input");
+  inUnidade.type = "text";
+  inUnidade.placeholder = UNIDADE_PADRAO[risco.agente] || "unidade (mg/m³, ppm…)";
+  inUnidade.value = risco.unidade || "";
+  inUnidade.setAttribute("aria-label", "Unidade do índice");
+
+  const salvarIndice = () => {
+    const temValor = inValor.value.trim() !== "";
+    let unidade = inUnidade.value.trim();
+    // Preenche a unidade padrão do agente ao informar um valor sem unidade.
+    if (temValor && !unidade && UNIDADE_PADRAO[risco.agente]) {
+      unidade = UNIDADE_PADRAO[risco.agente];
+      inUnidade.value = unidade;
+    }
+    atualizarRisco(setorAtivoId, funcaoAtivaId, risco.id, {
+      indice: temValor ? Number(inValor.value) : null,
+      unidade: unidade || null,
+    });
+  };
+  inValor.addEventListener("input", salvarIndice);
+  inUnidade.addEventListener("input", salvarIndice);
+
+  linhaInd.append(inValor, inUnidade);
+  campoIndice.append(rotInd, dicaInd, linhaInd);
+
   // Quantificação (opcional): data, hora e equipamento da medição instrumental.
   const campoQuant = document.createElement("div");
   campoQuant.className = "campo";
@@ -190,7 +243,7 @@ function construirDetalheRisco(risco) {
   linha.append(inData, inHora, inEquip);
   campoQuant.append(rotQuant, dicaQuant, linha);
 
-  wrap.append(campoNivel, campoObs, campoQuant, construirEvidencias(risco));
+  wrap.append(campoNivel, campoObs, campoIndice, campoQuant, construirEvidencias(risco));
   return wrap;
 }
 

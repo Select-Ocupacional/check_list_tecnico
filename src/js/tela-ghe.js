@@ -24,16 +24,47 @@ const NIVEL_ROTULO = {
 
 /* ---------- Sugestões automáticas de agrupamento (SST-12) ---------- */
 
+// Agentes físicos comparados por VALOR medido (índice), não pelo nível.
+// Químicos (grupo inteiro) também comparam por valor. Ver comparaPorValor().
+const AGENTES_POR_VALOR = new Set([
+  "Ruído contínuo ou intermitente",
+  "Vibração de mãos e braços",
+  "Vibração de corpo inteiro",
+]);
+
+/** Este risco é comparado por valor medido no agrupamento? */
+function comparaPorValor(r) {
+  return r.grupo === "quimico" || AGENTES_POR_VALOR.has(r.agente);
+}
+
+/** Um risco tem índice medido/sabido informado? */
+function temIndice(r) {
+  return Number.isFinite(r.indice);
+}
+
 /**
- * Assinatura do perfil de risco de uma função: conjunto de
- * (grupo|agente|nível) dos riscos presentes, ordenado. Funções com a mesma
- * assinatura têm os MESMOS riscos e o MESMO nível de exposição — critério de
- * exposição homogênea (GHE). Medições (data/hora/equipamento) não entram.
+ * Chave de comparação de um risco:
+ * - agentes medidos (ruído contínuo/intermitente, vibrações, químicos) com
+ *   índice informado → o VALOR exato (+ unidade): "v:85:db(a)";
+ * - demais casos (ou sem índice) → o nível de exposição: "n:alto".
+ */
+function chaveComparacao(r) {
+  if (comparaPorValor(r) && temIndice(r)) {
+    return `v:${r.indice}:${(r.unidade || "").trim().toLowerCase()}`;
+  }
+  return `n:${r.nivel_exposicao || "nao_avaliado"}`;
+}
+
+/**
+ * Assinatura do perfil de risco de uma função: conjunto ordenado de
+ * (grupo|agente|chave) dos riscos presentes. Funções com a mesma assinatura
+ * têm os MESMOS riscos e — conforme o agente — o mesmo nível OU o mesmo valor
+ * medido (exposição homogênea, critério do GHE).
  */
 function assinaturaRiscos(funcao) {
   return (funcao.avaliacoes_risco || [])
     .filter((r) => r.presente !== false)
-    .map((r) => `${r.grupo}|${r.agente}|${r.nivel_exposicao || "nao_avaliado"}`)
+    .map((r) => `${r.grupo}|${r.agente}|${chaveComparacao(r)}`)
     .sort()
     .join("§");
 }
@@ -73,10 +104,19 @@ function riscosDoGrupo(grupo) {
   return (grupo.membros[0].funcao.avaliacoes_risco || []).filter((r) => r.presente !== false);
 }
 
-/** Texto curto do perfil: "Ruído (Alto) · Poeira (Médio)". */
+/** Rótulo do valor medido do risco (ex.: "85 dB(A)") ou "". */
+function rotuloIndice(r) {
+  if (!temIndice(r)) return "";
+  return `${r.indice}${r.unidade ? " " + r.unidade : ""}`;
+}
+
+/** Texto curto do perfil: "Ruído (85 dB(A)) · Poeira (Médio)". */
 function descreverPerfil(grupo) {
   return riscosDoGrupo(grupo)
-    .map((r) => `${r.agente} (${NIVEL_ROTULO[r.nivel_exposicao] || "—"})`)
+    .map((r) => {
+      const val = comparaPorValor(r) && temIndice(r) ? rotuloIndice(r) : NIVEL_ROTULO[r.nivel_exposicao] || "—";
+      return `${r.agente} (${val})`;
+    })
     .join(" · ");
 }
 
@@ -116,7 +156,8 @@ function construirConsulta(grupo) {
   ulR.className = "ghe-sug-consulta__lista";
   riscosDoGrupo(grupo).forEach((r) => {
     const li = document.createElement("li");
-    li.textContent = `${r.agente} — ${NIVEL_ROTULO[r.nivel_exposicao] || "—"}`;
+    const val = rotuloIndice(r);
+    li.textContent = `${r.agente} — ${NIVEL_ROTULO[r.nivel_exposicao] || "—"}` + (val ? ` · ${val}` : "");
     ulR.appendChild(li);
   });
   if (!ulR.childElementCount) {
