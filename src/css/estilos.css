@@ -848,3 +848,57 @@ input.invalido, select.invalido, textarea.invalido {
   white-space: nowrap;
   align-self: center;
 }
+
+/* ============ Sugestões de agrupamento de GHE ============ */
+.ghe-sugestoes { margin: 4px 0 20px; }
+.ghe-sug-card {
+  background: var(--card, #fff);
+  border: 1px solid var(--linha, #DDE3EC);
+  border-left: 4px solid var(--teal, #1BA89D);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.ghe-sug-card__cab { margin-bottom: 8px; }
+.ghe-sug-card__tit { margin: 0; font-weight: 600; }
+.ghe-sug-card__perfil {
+  margin: 2px 0 0;
+  font-size: .86rem;
+  color: var(--teal-escuro, #148077);
+}
+.ghe-sug-card__funcoes { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 3px; }
+.ghe-sug-card__funcoes li { font-size: .9rem; }
+.ghe-sug-tag {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: .72rem;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--cinza-claro, #F5F5F5);
+  color: var(--cinza-medio, #6B7280);
+}
+.ghe-sug-card__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.ghe-sug-card__acoes .btn { flex: 1 1 auto; }
+.ghe-sug-consulta {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--cinza-claro, #F5F5F5);
+  border-radius: 10px;
+}
+.ghe-sug-consulta__tit {
+  margin: 0 0 6px;
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 600;
+  color: var(--cinza-medio, #6B7280);
+}
+.ghe-sug-consulta__tit:not(:first-child) { margin-top: 12px; }
+.ghe-sug-consulta__lista { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+.ghe-sug-consulta__lista li { font-size: .88rem; }
+.ghe-sug-consulta__vazio { list-style: none; margin-left: -18px; color: var(--cinza-medio, #6B7280); font-style: italic; }

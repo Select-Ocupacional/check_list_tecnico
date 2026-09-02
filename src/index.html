@@ -414,6 +414,13 @@
       <h2 id="titulo-ghe" class="tela__titulo">Grupos Homogêneos de Exposição (GHE)</h2>
       <p class="tela__ajuda">Crie os GHEs e selecione, em cada um, as funções (cadastradas nos setores) que compartilham a mesma exposição.</p>
 
+      <!-- Sugestões automáticas: funções com mesmos riscos e mesmo nível -->
+      <section id="ghe-sugestoes" class="ghe-sugestoes" hidden>
+        <h3 class="subtitulo">Sugestões de agrupamento</h3>
+        <p class="tela__ajuda">Funções com os <strong>mesmos riscos</strong> e o <strong>mesmo nível de exposição</strong> — candidatas ao mesmo GHE. Consulte os riscos/medições e crie o GHE com um toque.</p>
+        <div id="ghe-sugestoes-lista"></div>
+      </section>
+
       <form id="form-novo-ghe" class="setor-form" novalidate>
         <div class="campo">
           <label for="ghe_nome">Nome do GHE *</label>
