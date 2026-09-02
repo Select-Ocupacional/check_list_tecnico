@@ -26,6 +26,29 @@ export function ehDataUrl(ref) {
   return typeof ref === "string" && ref.startsWith("data:");
 }
 
+/** Um ref é um caminho do Storage (não data URL nem URL http)? */
+export function ehCaminhoStorage(ref) {
+  return typeof ref === "string" && ref.length > 0 && !ref.startsWith("data:") && !/^https?:/i.test(ref);
+}
+
+/** Remove do bucket os objetos nos caminhos informados. Retorna quantos foram pedidos. */
+export async function removerBinarios(paths) {
+  const alvos = (paths || []).filter(ehCaminhoStorage);
+  if (!alvos.length) return 0;
+  const token = await tokenAcesso();
+  const resp = await fetch(`${STORAGE}/object/${BUCKET}`, {
+    method: "DELETE",
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ prefixes: alvos }),
+  });
+  if (!resp.ok) throw new Error(`remover binarios ${resp.status}: ${await resp.text().catch(() => "")}`);
+  return alvos.length;
+}
+
 /** Envia um binário (data URL) ao Storage no caminho informado. */
 export async function uploadBinario(path, dataUrl) {
   const token = await tokenAcesso();

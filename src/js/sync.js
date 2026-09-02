@@ -13,7 +13,7 @@ import {
   obterVisita as dbObter,
   salvarVisita as dbSalvar,
 } from "./db.js";
-import { uploadBinario, ehDataUrl } from "./storage.js";
+import { uploadBinario, ehDataUrl, ehCaminhoStorage, removerBinarios } from "./storage.js";
 
 const REST = `${SUPABASE_URL}/rest/v1`;
 
@@ -103,6 +103,36 @@ async function baixarVisitas() {
     throw new Error(`pull ${resp.status}: ${txt}`);
   }
   return resp.json();
+}
+
+/** Reúne os caminhos de Storage (fotos e assinaturas) de uma visita. */
+function coletarBinarios(v) {
+  const paths = [];
+  (v?.setores || []).forEach((s) =>
+    (s.funcoes || []).forEach((f) =>
+      (f.avaliacoes_risco || []).forEach((r) =>
+        (r.evidencias || []).forEach((e) => { if (e.arquivo_ref) paths.push(e.arquivo_ref); })
+      )
+    )
+  );
+  (v?.assinaturas || []).forEach((a) => { if (a.assinatura_ref) paths.push(a.assinatura_ref); });
+  return paths.filter(ehCaminhoStorage);
+}
+
+/** A visita possui fotos/assinaturas guardadas no Storage? */
+export function visitaTemFotos(v) {
+  return coletarBinarios(v).length > 0;
+}
+
+/** Exclui do Storage as fotos/assinaturas da visita. Retorna nº removido (0 se offline/erro). */
+export async function excluirFotosVisitaRemota(v) {
+  if (!navigator.onLine) return 0;
+  try {
+    return await removerBinarios(coletarBinarios(v));
+  } catch (e) {
+    console.warn("Falha ao excluir fotos da visita", v?.id, e);
+    return 0;
+  }
 }
 
 /** Exclui uma visita no servidor (best-effort). */

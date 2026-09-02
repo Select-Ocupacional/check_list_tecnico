@@ -47,7 +47,13 @@ import {
   cadastrar,
   sair,
 } from "./auth.js";
-import { sincronizar, contarPendentes, excluirVisitaRemota } from "./sync.js";
+import {
+  sincronizar,
+  contarPendentes,
+  excluirVisitaRemota,
+  excluirFotosVisitaRemota,
+  visitaTemFotos,
+} from "./sync.js";
 import {
   obterPapel,
   ehAdmin,
@@ -134,12 +140,15 @@ async function renderizarListaVisitas() {
     excluir.textContent = "✕";
     excluir.addEventListener("click", async (e) => {
       e.stopPropagation();
-      if (confirm("Excluir esta visita? Esta ação não pode ser desfeita.")) {
-        await excluirVisita(v.id);
-        excluirVisitaRemota(v.id); // best-effort no servidor
-        renderizarListaVisitas();
-        atualizarStatusSync();
-      }
+      if (!confirm("Excluir esta visita? Esta ação não pode ser desfeita.")) return;
+      const apagarFotos = visitaTemFotos(v)
+        ? confirm("Excluir também as fotos e assinaturas desta visita no armazenamento?\n\nOK = apagar as imagens · Cancelar = manter as imagens.")
+        : false;
+      await excluirVisita(v.id);
+      excluirVisitaRemota(v.id); // best-effort no servidor
+      if (apagarFotos) await excluirFotosVisitaRemota(v);
+      renderizarListaVisitas();
+      atualizarStatusSync();
     });
 
     li.append(abrir, relatorio, excluir);
@@ -310,8 +319,12 @@ function renderizarAdminVisitas() {
     excluir.textContent = "✕";
     excluir.addEventListener("click", async () => {
       if (!confirm(`Excluir a visita de "${v.cliente_razao || "sem razão social"}" (técnico ${nomeTecnico(v)})? Esta ação não pode ser desfeita.`)) return;
+      const apagarFotos = visitaTemFotos(v.dados)
+        ? confirm("Excluir também as fotos e assinaturas desta visita no armazenamento?\n\nOK = apagar as imagens · Cancelar = manter as imagens.")
+        : false;
       const ok = await excluirVisitaRemota(v.id);
       if (!ok) { alert("Não foi possível excluir no servidor."); return; }
+      if (apagarFotos) await excluirFotosVisitaRemota(v.dados);
       await excluirVisita(v.id); // remove a cópia local, se houver
       adminVisitas = adminVisitas.filter((x) => x.id !== v.id);
       renderizarAdminVisitas();
