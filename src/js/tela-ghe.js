@@ -45,14 +45,15 @@ function temIndice(r) {
 /**
  * Chave de comparação de um risco:
  * - agentes medidos (ruído contínuo/intermitente, vibrações, químicos) com
- *   índice informado → o VALOR exato (+ unidade): "v:85:db(a)";
- * - demais casos (ou sem índice) → o nível de exposição: "n:alto".
+ *   índice informado → nível E valor exato precisam bater: "n:alto|v:85:db(a)";
+ * - demais casos (ou sem índice) → apenas o nível de exposição: "n:alto".
  */
 function chaveComparacao(r) {
+  const nivel = `n:${r.nivel_exposicao || "nao_avaliado"}`;
   if (comparaPorValor(r) && temIndice(r)) {
-    return `v:${r.indice}:${(r.unidade || "").trim().toLowerCase()}`;
+    return `${nivel}|v:${r.indice}:${(r.unidade || "").trim().toLowerCase()}`;
   }
-  return `n:${r.nivel_exposicao || "nao_avaliado"}`;
+  return nivel;
 }
 
 /**
