@@ -13,6 +13,19 @@ function cabecalhos(extra = {}) {
   return { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, ...extra };
 }
 
+const ERRO_REDE = "Servidor indisponível no momento. Tente novamente em instantes ou avise o administrador.";
+
+/** fetch que converte falha de rede (ex.: backend fora do ar) em erro claro. */
+async function fetchAuth(url, opcoes) {
+  try {
+    return await fetch(url, opcoes);
+  } catch {
+    const e = new Error(ERRO_REDE);
+    e.code = "rede";
+    throw e;
+  }
+}
+
 /** Sessão atual (ou null). */
 export function sessao() {
   try {
@@ -49,7 +62,7 @@ function mensagemErro(dados, padrao) {
 
 /** Login com e-mail e senha. Requer conexão. */
 export async function entrar(email, senha) {
-  const resp = await fetch(`${AUTH}/token?grant_type=password`, {
+  const resp = await fetchAuth(`${AUTH}/token?grant_type=password`, {
     method: "POST",
     headers: cabecalhos(),
     body: JSON.stringify({ email, password: senha }),
@@ -61,7 +74,7 @@ export async function entrar(email, senha) {
 
 /** Cadastro. Se "Confirm email" estiver desativado, já retorna sessão. */
 export async function cadastrar(email, senha, nome) {
-  const resp = await fetch(`${AUTH}/signup`, {
+  const resp = await fetchAuth(`${AUTH}/signup`, {
     method: "POST",
     headers: cabecalhos(),
     body: JSON.stringify({ email, password: senha, data: { nome } }),
