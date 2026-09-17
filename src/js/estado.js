@@ -14,7 +14,7 @@ import {
 
 // Chave do rascunho único da versão anterior (localStorage) — usada só na migração.
 const CHAVE_STORAGE_ANTIGA = "select_visita_tecnica_rascunho";
-const VERSAO_SCHEMA = "1.9.0";
+const VERSAO_SCHEMA = "1.10.0";
 
 /** Gera um UUID v4 (usa crypto nativo quando disponível). */
 export function gerarUuid() {
@@ -456,12 +456,15 @@ export function adicionarEpiEpc(setorId, funcaoId, dados) {
     id: gerarUuid(),
     tipo: dados.tipo,
     descricao: (dados.descricao || "").trim(),
+  };
+  if (dados.grupo) item.grupo = dados.grupo;
+  Object.assign(item, {
     fornecido: dados.fornecido,
     em_uso: dados.em_uso,
     estado_conservacao: dados.estado_conservacao,
     conforme: dados.conforme,
     observacao: (dados.observacao || "").trim(),
-  };
+  });
   if (dados.tipo === "epi" && dados.numero_ca) item.numero_ca = dados.numero_ca.trim();
   if (!item.observacao) delete item.observacao;
   funcao.verificacoes_epi_epc.push(item);

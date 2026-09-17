@@ -922,3 +922,17 @@ input.invalido, select.invalido, textarea.invalido {
 }
 .lista-avaliadas__item small { color: var(--cinza-medio, #6B7280); white-space: nowrap; }
 .lista-avaliadas__item--ativa { background: var(--realce-bg, #E8F6F4); }
+
+/* Bloco de EPIs/EPCs por grupo de risco (Tela 3) */
+.risco-epi {
+  margin: 10px 12px 4px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--linha, #DDE3EC);
+}
+.risco-epi__titulo { margin: 0 0 8px; }
+.risco-epi__lista { margin: 0 0 10px; }
+.epi-form-inline { display: grid; gap: 8px; }
+.epi-form-inline__linha { display: flex; flex-wrap: wrap; gap: 8px; }
+.epi-form-inline__linha > * { flex: 1 1 140px; min-width: 0; }
+.epi-form-inline select,
+.epi-form-inline input { width: 100%; }

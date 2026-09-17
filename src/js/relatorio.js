@@ -128,9 +128,9 @@ function blocoRiscos(v) {
             ${epis.length ? `
               <p class="rel-rot" style="margin-top:6px">EPIs / EPCs</p>
               <table class="rel-tab">
-                <thead><tr><th>Tipo</th><th>Descrição</th><th>CA</th><th>Fornece</th><th>Uso correto</th><th>Conservação</th><th>Conformidade</th></tr></thead>
+                <thead><tr><th>Grupo</th><th>Tipo</th><th>Descrição</th><th>CA</th><th>Fornece</th><th>Uso correto</th><th>Conservação</th><th>Conformidade</th></tr></thead>
                 <tbody>
-                  ${epis.map((e) => `<tr><td>${e.tipo === "epi" ? "EPI" : "EPC"}</td><td>${esc(e.descricao)}</td><td>${esc(e.numero_ca || "—")}</td><td>${e.fornecido ? "Sim" : "Não"}</td><td>${e.em_uso ? "Sim" : "Não"}</td><td>${esc(CONSERVACAO[e.estado_conservacao] || "—")}</td><td>${e.conforme === "conforme" ? "Conforme" : "Não conforme"}</td></tr>`).join("")}
+                  ${epis.map((e) => `<tr><td>${esc(GRUPO[e.grupo] || "—")}</td><td>${e.tipo === "epi" ? "EPI" : "EPC"}</td><td>${esc(e.descricao)}</td><td>${esc(e.numero_ca || "—")}</td><td>${e.fornecido ? "Sim" : "Não"}</td><td>${e.em_uso ? "Sim" : "Não"}</td><td>${esc(CONSERVACAO[e.estado_conservacao] || "—")}</td><td>${e.conforme === "conforme" ? "Conforme" : "Não conforme"}</td></tr>`).join("")}
                 </tbody>
               </table>` : ""}
           </div>`;

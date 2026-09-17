@@ -344,64 +344,12 @@
       <!-- Riscos: grupos e agentes gerados dinamicamente (catalogo-riscos.js) -->
       <h3 class="subtitulo">Riscos ocupacionais</h3>
       <p class="tela__ajuda">Ative os agentes de risco identificados para esta função. Ao ativar, informe o nível de exposição.</p>
+      <p class="tela__ajuda">Ao final de cada grupo, registre os EPIs/EPCs relacionados àquele grupo de risco.</p>
       <div id="riscos-container" aria-live="polite"></div>
 
-      <!-- EPI / EPC -->
-      <h3 class="subtitulo">EPIs e EPCs</h3>
-      <form id="form-novo-epi" class="epi-form" novalidate>
-        <div class="campo-linha">
-          <div class="campo campo--pequeno">
-            <label for="epi_tipo">Tipo *</label>
-            <select id="epi_tipo" name="epi_tipo">
-              <option value="epi">EPI (individual)</option>
-              <option value="epc">EPC (coletivo)</option>
-            </select>
-          </div>
-          <div class="campo">
-            <label for="epi_descricao">Descrição *</label>
-            <input type="text" id="epi_descricao" name="epi_descricao" list="lista-epi-nr06"
-                   placeholder="Escolha da lista ou digite outro" autocomplete="off" />
-            <datalist id="lista-epi-nr06"></datalist>
-            <datalist id="lista-epc"></datalist>
-          </div>
-        </div>
-
-        <div class="campo" id="campo-ca">
-          <label for="epi_ca">Número do CA * <span class="rotulo-hint">(obrigatório para EPI)</span></label>
-          <input type="text" id="epi_ca" name="epi_ca" inputmode="numeric"
-                 placeholder="Ex.: 12345" autocomplete="off" />
-        </div>
-
-        <div class="campo">
-          <span class="rotulo-grupo">A empresa fornece?</span>
-          <div class="segmentado" id="epi_fornecido" role="group" aria-label="A empresa fornece o EPI/EPC?">
-            <button type="button" data-val="true">Sim</button>
-            <button type="button" data-val="false">Não</button>
-          </div>
-        </div>
-
-        <div class="campo">
-          <span class="rotulo-grupo">Uso correto pelos colaboradores?</span>
-          <div class="segmentado" id="epi_em_uso" role="group" aria-label="Uso correto pelos colaboradores?">
-            <button type="button" data-val="true">Sim</button>
-            <button type="button" data-val="false">Não</button>
-          </div>
-        </div>
-
-        <div class="campo">
-          <span class="rotulo-grupo">Condições de conservação</span>
-          <div class="segmentado" id="epi_conservacao" role="group" aria-label="Condições de conservação">
-            <button type="button" data-val="bom">Adequado</button>
-            <button type="button" data-val="ruim">Inadequado</button>
-          </div>
-        </div>
-
-        <small class="campo__erro" data-erro="epi_form"></small>
-        <button type="submit" class="btn btn--secundario btn--bloco">+ Adicionar EPI/EPC</button>
-      </form>
-
-      <ul id="lista-epi" class="lista-setores" aria-live="polite"></ul>
-      <p id="epi-vazio" class="lista-vazia">Nenhum EPI/EPC registrado nesta função.</p>
+      <!-- Listas de sugestão (NR-06 e EPCs) usadas pelos blocos de EPI/EPC por grupo -->
+      <datalist id="lista-epi-nr06"></datalist>
+      <datalist id="lista-epc"></datalist>
 
       <!-- Volta ao topo (seletores) para avaliar a próxima função/setor -->
       <button type="button" id="btn-incluir-outra" class="btn btn--secundario btn--bloco">

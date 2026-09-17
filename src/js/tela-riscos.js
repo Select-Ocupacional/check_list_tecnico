@@ -118,7 +118,6 @@ function abrirFuncao(funcaoId) {
   construirSeletorFuncoes();
   atualizarVisibilidade();
   renderizarRiscos();
-  renderizarEpis();
   renderizarAvaliadas();
   $("#riscos-conteudo")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -492,63 +491,17 @@ function renderizarRiscos() {
 
     contagem.textContent = ativos ? `${ativos} ativo(s)` : "nenhum";
     card.append(cab, lista);
+    // EPIs/EPCs deste grupo, logo após os agentes.
+    card.appendChild(construirBlocoEpi(funcao, grupo.chave));
     container.appendChild(card);
   });
+
+  renderizarEpiLegado(funcao, container);
 }
 
-/* ---------- EPI / EPC ---------- */
+/* ---------- EPI / EPC (por grupo de risco) ---------- */
 
-function renderizarEpis() {
-  const lista = $("#lista-epi");
-  const vazio = $("#epi-vazio");
-  if (!lista) return;
-  const funcao = obterFuncao(setorAtivoId, funcaoAtivaId);
-  lista.innerHTML = "";
-  const itens = funcao?.verificacoes_epi_epc ?? [];
-  vazio.hidden = itens.length > 0;
-
-  const rotuloConserv = { bom: "Adequado", regular: "Regular", ruim: "Inadequado", nao_aplicavel: "N/A" };
-
-  itens.forEach((item) => {
-    const li = document.createElement("li");
-    li.className = "setor-card";
-    if (item.conforme === "nao_conforme") li.classList.add("setor-card--alerta");
-
-    const info = document.createElement("div");
-    info.className = "setor-card__info";
-
-    const titulo = document.createElement("p");
-    titulo.className = "setor-card__nome";
-    const tag = item.tipo === "epi" ? "EPI" : "EPC";
-    titulo.textContent = `[${tag}] ${item.descricao}`;
-    info.appendChild(titulo);
-
-    const detalhes = [];
-    if (item.tipo === "epi" && item.numero_ca) detalhes.push(`CA ${item.numero_ca}`);
-    detalhes.push(`Fornece: ${item.fornecido ? "Sim" : "Não"}`);
-    detalhes.push(`Uso correto: ${item.em_uso ? "Sim" : "Não"}`);
-    detalhes.push(`Conservação: ${rotuloConserv[item.estado_conservacao] ?? "—"}`);
-    detalhes.push(item.conforme === "conforme" ? "✔ Conforme" : "✖ Não conforme");
-
-    const desc = document.createElement("p");
-    desc.className = "setor-card__desc";
-    desc.textContent = detalhes.join(" · ");
-    info.appendChild(desc);
-
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "setor-card__remover";
-    btn.setAttribute("aria-label", `Remover ${item.descricao}`);
-    btn.textContent = "✕";
-    btn.addEventListener("click", () => {
-      removerEpiEpc(setorAtivoId, funcaoAtivaId, item.id);
-      renderizarEpis();
-    });
-
-    li.append(info, btn);
-    lista.appendChild(li);
-  });
-}
+const CONSERV_ROTULO = { bom: "Adequado", regular: "Regular", ruim: "Inadequado", nao_aplicavel: "N/A" };
 
 /** Deriva a conformidade do EPI/EPC a partir das respostas. */
 function derivarConformeEpi({ fornecido, em_uso, estado_conservacao }) {
@@ -557,14 +510,9 @@ function derivarConformeEpi({ fornecido, em_uso, estado_conservacao }) {
   return "conforme";
 }
 
-function inicializarFormEpi() {
-  const form = $("#form-novo-epi");
-  const selTipo = $("#epi_tipo");
-  const campoCa = $("#campo-ca");
-  const erro = $('[data-erro="epi_form"]');
-
-  // Popula as listas de sugestões (o técnico pode escolher ou digitar outro).
-  const preencherDatalist = (id, itens) => {
+/** Popula os datalists de sugestão (NR-06 e EPCs) uma vez. */
+function preencherDatalistsEpi() {
+  const preencher = (id, itens) => {
     const dl = $("#" + id);
     if (dl && !dl.childElementCount) {
       itens.forEach((nome) => {
@@ -574,64 +522,173 @@ function inicializarFormEpi() {
       });
     }
   };
-  preencherDatalist("lista-epi-nr06", EPIS_NR06);
-  preencherDatalist("lista-epc", EPCS_COMUNS);
+  preencher("lista-epi-nr06", EPIS_NR06);
+  preencher("lista-epc", EPCS_COMUNS);
+}
 
-  const descricao = $("#epi_descricao");
-  // Ajusta CA (só EPI) e a lista de sugestões conforme o tipo.
+/** Cria um <select> a partir de pares [valor, texto]. */
+function criarSelectEpi(opcoes) {
+  const s = document.createElement("select");
+  opcoes.forEach(([v, t]) => {
+    const o = document.createElement("option");
+    o.value = v;
+    o.textContent = t;
+    s.appendChild(o);
+  });
+  return s;
+}
+
+/** Card de um EPI/EPC já registrado, com botão de remover. */
+function construirItemEpi(item) {
+  const li = document.createElement("li");
+  li.className = "setor-card";
+  if (item.conforme === "nao_conforme") li.classList.add("setor-card--alerta");
+
+  const info = document.createElement("div");
+  info.className = "setor-card__info";
+  const titulo = document.createElement("p");
+  titulo.className = "setor-card__nome";
+  titulo.textContent = `[${item.tipo === "epi" ? "EPI" : "EPC"}] ${item.descricao}`;
+  info.appendChild(titulo);
+
+  const detalhes = [];
+  if (item.tipo === "epi" && item.numero_ca) detalhes.push(`CA ${item.numero_ca}`);
+  detalhes.push(`Fornece: ${item.fornecido ? "Sim" : "Não"}`);
+  detalhes.push(`Uso correto: ${item.em_uso ? "Sim" : "Não"}`);
+  detalhes.push(`Conservação: ${CONSERV_ROTULO[item.estado_conservacao] ?? "—"}`);
+  detalhes.push(item.conforme === "conforme" ? "✔ Conforme" : "✖ Não conforme");
+  const desc = document.createElement("p");
+  desc.className = "setor-card__desc";
+  desc.textContent = detalhes.join(" · ");
+  info.appendChild(desc);
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "setor-card__remover";
+  btn.setAttribute("aria-label", `Remover ${item.descricao}`);
+  btn.textContent = "✕";
+  btn.addEventListener("click", () => {
+    removerEpiEpc(setorAtivoId, funcaoAtivaId, item.id);
+    renderizarRiscos();
+  });
+
+  li.append(info, btn);
+  return li;
+}
+
+/** Bloco de EPIs/EPCs de um grupo de risco: lista + formulário de inclusão. */
+function construirBlocoEpi(funcao, grupoChave) {
+  const bloco = document.createElement("div");
+  bloco.className = "risco-epi";
+
+  const rot = document.createElement("p");
+  rot.className = "rotulo-grupo risco-epi__titulo";
+  rot.textContent = "EPIs / EPCs deste grupo";
+  bloco.appendChild(rot);
+
+  // Itens já cadastrados neste grupo.
+  const itens = (funcao.verificacoes_epi_epc || []).filter((i) => i.grupo === grupoChave);
+  const ul = document.createElement("ul");
+  ul.className = "lista-setores risco-epi__lista";
+  itens.forEach((item) => ul.appendChild(construirItemEpi(item)));
+  bloco.appendChild(ul);
+
+  // Formulário compacto (selects) para adicionar um EPI/EPC ao grupo.
+  const form = document.createElement("form");
+  form.className = "epi-form-inline";
+  form.noValidate = true;
+
+  const selTipo = criarSelectEpi([["epi", "EPI (individual)"], ["epc", "EPC (coletivo)"]]);
+  const descricao = document.createElement("input");
+  descricao.type = "text";
+  descricao.placeholder = "Descrição (escolha ou digite)";
+  descricao.autocomplete = "off";
+  descricao.setAttribute("list", "lista-epi-nr06");
+  const ca = document.createElement("input");
+  ca.type = "text";
+  ca.inputMode = "numeric";
+  ca.placeholder = "Nº do CA (obrigatório para EPI)";
+  const selForn = criarSelectEpi([["", "Fornece? —"], ["true", "Fornece: Sim"], ["false", "Fornece: Não"]]);
+  const selUso = criarSelectEpi([["", "Uso correto? —"], ["true", "Uso correto: Sim"], ["false", "Uso correto: Não"]]);
+  const selCons = criarSelectEpi([["", "Conservação —"], ["bom", "Conservação: Adequado"], ["ruim", "Conservação: Inadequado"]]);
+  const erro = document.createElement("small");
+  erro.className = "campo__erro";
+  const add = document.createElement("button");
+  add.type = "submit";
+  add.className = "btn btn--secundario btn--bloco";
+  add.textContent = "+ Adicionar EPI/EPC";
+
   const atualizarPorTipo = () => {
     const ehEpi = selTipo.value === "epi";
-    campoCa.hidden = !ehEpi;
-    if (descricao) descricao.setAttribute("list", ehEpi ? "lista-epi-nr06" : "lista-epc");
+    ca.hidden = !ehEpi;
+    descricao.setAttribute("list", ehEpi ? "lista-epi-nr06" : "lista-epc");
   };
-  selTipo?.addEventListener("change", atualizarPorTipo);
+  selTipo.addEventListener("change", atualizarPorTipo);
   atualizarPorTipo();
 
-  // Segmentados do formulário.
-  ligarSegmentado("#epi_fornecido");
-  ligarSegmentado("#epi_em_uso");
-  ligarSegmentado("#epi_conservacao");
-
-  form?.addEventListener("submit", (ev) => {
+  form.addEventListener("submit", (ev) => {
     ev.preventDefault();
     erro.textContent = "";
-
-    if (!funcaoAtivaId) return falhar("Selecione uma função antes de adicionar EPIs/EPCs.");
-
     const tipo = selTipo.value;
-    const descricao = $("#epi_descricao").value.trim();
-    const numero_ca = $("#epi_ca").value.trim();
-    const fornecido = lerSegmentado("#epi_fornecido");
-    const em_uso = lerSegmentado("#epi_em_uso");
-    const estado_conservacao = lerSegmentado("#epi_conservacao");
+    const desc = descricao.value.trim();
+    const numero_ca = ca.value.trim();
+    const fornecido = selForn.value;
+    const em_uso = selUso.value;
+    const estado_conservacao = selCons.value;
 
-    if (!descricao) return falhar("Informe a descrição do EPI/EPC.");
-    if (tipo === "epi" && !numero_ca) return falhar("Informe o número do CA (obrigatório para EPI).");
-    if (fornecido === null) return falhar("Informe se a empresa fornece.");
-    if (em_uso === null) return falhar("Informe se há uso correto.");
-    if (estado_conservacao === null) return falhar("Informe as condições de conservação.");
+    if (!desc) return (erro.textContent = "Informe a descrição do EPI/EPC.");
+    if (tipo === "epi" && !numero_ca) return (erro.textContent = "Informe o número do CA (obrigatório para EPI).");
+    if (fornecido === "") return (erro.textContent = "Informe se a empresa fornece.");
+    if (em_uso === "") return (erro.textContent = "Informe se há uso correto.");
+    if (estado_conservacao === "") return (erro.textContent = "Informe as condições de conservação.");
 
     const dados = {
+      grupo: grupoChave,
       tipo,
-      descricao,
+      descricao: desc,
       numero_ca,
       fornecido: fornecido === "true",
       em_uso: em_uso === "true",
       estado_conservacao,
     };
     dados.conforme = derivarConformeEpi(dados);
-
     adicionarEpiEpc(setorAtivoId, funcaoAtivaId, dados);
-    form.reset();
-    limparSegmentado("#epi_fornecido");
-    limparSegmentado("#epi_em_uso");
-    limparSegmentado("#epi_conservacao");
-    atualizarPorTipo();
-    renderizarEpis();
-    $("#epi_descricao").focus();
-
-    function falhar(msg) { erro.textContent = msg; return; }
+    renderizarRiscos();
   });
+
+  const linhaTipo = document.createElement("div");
+  linhaTipo.className = "epi-form-inline__linha";
+  linhaTipo.append(selTipo, descricao);
+  const linhaCond = document.createElement("div");
+  linhaCond.className = "epi-form-inline__linha";
+  linhaCond.append(selForn, selUso, selCons);
+
+  form.append(linhaTipo, ca, linhaCond, erro, add);
+  bloco.appendChild(form);
+  return bloco;
+}
+
+/**
+ * Compatibilidade: EPIs/EPCs antigos (sem grupo) da função aparecem num bloco
+ * ao final, para não sumirem — o técnico pode removê-los e recadastrar no grupo.
+ */
+function renderizarEpiLegado(funcao, container) {
+  const legados = (funcao.verificacoes_epi_epc || []).filter((i) => !i.grupo);
+  if (!legados.length) return;
+
+  const card = document.createElement("section");
+  card.className = "risco-grupo";
+  const cab = document.createElement("header");
+  cab.className = "risco-grupo__cabecalho";
+  const titulo = document.createElement("h4");
+  titulo.className = "risco-grupo__titulo";
+  titulo.textContent = "🦺 EPIs/EPCs sem grupo (anteriores)";
+  cab.appendChild(titulo);
+  const ul = document.createElement("ul");
+  ul.className = "lista-setores";
+  legados.forEach((item) => ul.appendChild(construirItemEpi(item)));
+  card.append(cab, ul);
+  container.appendChild(card);
 }
 
 /* ---------- Componentes reutilizáveis ---------- */
@@ -649,29 +706,6 @@ function criarSwitch(marcado, rotulo, onChange) {
   input.addEventListener("change", () => onChange(input.checked));
   label.append(input, trilho);
   return label;
-}
-
-/** Liga o comportamento de seleção de um segmentado já presente no HTML. */
-function ligarSegmentado(sel) {
-  const grupo = $(sel);
-  if (!grupo) return;
-  grupo.querySelectorAll("button").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      grupo.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", "false"));
-      btn.setAttribute("aria-pressed", "true");
-    });
-  });
-}
-
-/** Lê o valor selecionado de um segmentado (ou null). */
-function lerSegmentado(sel) {
-  const btn = $(`${sel} button[aria-pressed="true"]`);
-  return btn ? btn.dataset.val : null;
-}
-
-/** Limpa a seleção de um segmentado. */
-function limparSegmentado(sel) {
-  $(sel)?.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", "false"));
 }
 
 /* ---------- API da tela ---------- */
@@ -701,19 +735,19 @@ export function renderizarTelaRiscos() {
   construirSeletorFuncoes();
   atualizarVisibilidade();
   renderizarRiscos();
-  renderizarEpis();
   renderizarAvaliadas();
 }
 
 /** Inicializa listeners persistentes da Tela 3. */
 export function inicializarTelaRiscos() {
+  preencherDatalistsEpi();
+
   $("#setor_ativo")?.addEventListener("change", (ev) => {
     setorAtivoId = ev.target.value;
     funcaoAtivaId = null; // ao trocar de setor, exige nova seleção de função
     construirSeletorFuncoes();
     atualizarVisibilidade();
     renderizarRiscos();
-    renderizarEpis();
     renderizarAvaliadas();
   });
   $("#funcao_ativa")?.addEventListener("change", (ev) => {
@@ -721,7 +755,6 @@ export function inicializarTelaRiscos() {
     construirSeletorFuncoes(); // re-marca a função anterior como "já avaliada"
     atualizarVisibilidade();
     renderizarRiscos();
-    renderizarEpis();
     renderizarAvaliadas();
   });
 
@@ -734,7 +767,6 @@ export function inicializarTelaRiscos() {
     construirSeletorFuncoes();
     atualizarVisibilidade();
     renderizarRiscos();
-    renderizarEpis();
     renderizarAvaliadas();
   });
 
@@ -745,6 +777,4 @@ export function inicializarTelaRiscos() {
     const fsel = $("#funcao_ativa");
     if (fsel) { try { fsel.focus({ preventScroll: true }); } catch { fsel.focus(); } }
   });
-
-  inicializarFormEpi();
 }

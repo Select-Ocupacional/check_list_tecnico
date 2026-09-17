@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://select-ocupacional.com.br/schemas/checklist-visita-tecnica/1.9.0.json",
+  "$id": "https://select-ocupacional.com.br/schemas/checklist-visita-tecnica/1.10.0.json",
   "title": "Check-list de Visita Técnica (SST)",
   "description": "Contrato de dados da Visita Técnica de SST da Select Ocupacional. Fonte única de validação de integridade (SST-01).",
   "type": "object",
-  "$comment": "versao_schema: 1.8.0. Historico: 1.1.0 removeu CPF; 1.2.0 removeu 'conforme' (SST-09) e +'avaliar' (SST-10); 1.3.0 +'funcoes' (SST-08); 1.4.0 +'quantificacao' (SST-11); 1.5.0 +'contatos' (SST-06); 1.6.0 +'ghes' (SST-12); 1.7.0 +'treinamentos' (SST-13); 1.8.0 moveu avaliacoes_risco/verificacoes_epi_epc do setor para a FUNCAO; 1.9.0 +indice/unidade no risco (agrupamento GHE por valor exato).",
+  "$comment": "versao_schema: 1.10.0. Historico: 1.1.0 removeu CPF; 1.2.0 removeu 'conforme' (SST-09) e +'avaliar' (SST-10); 1.3.0 +'funcoes' (SST-08); 1.4.0 +'quantificacao' (SST-11); 1.5.0 +'contatos' (SST-06); 1.6.0 +'ghes' (SST-12); 1.7.0 +'treinamentos' (SST-13); 1.8.0 moveu avaliacoes_risco/verificacoes_epi_epc do setor para a FUNCAO; 1.9.0 +indice/unidade no risco (agrupamento GHE por valor exato); 1.10.0 +grupo no EPI/EPC (bloco por grupo de risco).",
   "required": [
     "id",
     "status",
@@ -258,6 +258,11 @@
       "required": ["id", "tipo", "descricao", "conforme"],
       "properties": {
         "id": { "$ref": "#/$defs/uuid" },
+        "grupo": {
+          "type": "string",
+          "$comment": "1.10.0: grupo de risco ao qual o EPI/EPC se refere (bloco por grupo na Tela 3).",
+          "enum": ["fisico", "quimico", "biologico", "ergonomico", "acidente"]
+        },
         "tipo": { "type": "string", "enum": ["epi", "epc"] },
         "descricao": { "type": "string", "minLength": 1 },
         "numero_ca": { "type": "string" },
