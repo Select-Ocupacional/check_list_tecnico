@@ -24,6 +24,7 @@ import {
 import {
   inicializarTelaRiscos,
   renderizarTelaRiscos,
+  resetarTelaRiscos,
 } from "./tela-riscos.js";
 import {
   inicializarTelaGhe,
@@ -441,6 +442,7 @@ function entrarWizard() {
   btnInicio.hidden = false;
   btnAvancar.hidden = false;
   resetarEncerramento();
+  resetarTelaRiscos();
   preencherIdentificacao();
   irPara(0);
 }

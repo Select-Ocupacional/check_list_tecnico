@@ -686,6 +686,15 @@ function atualizarVisibilidade() {
   if (conteudo) conteudo.hidden = !(temFuncoes && funcaoAtivaId);
 }
 
+/** Zera o estado da Tela 3 (chamado ao abrir/entrar numa visita). */
+export function resetarTelaRiscos() {
+  setorAtivoId = null;
+  funcaoAtivaId = null;
+  editarAvaliadas = false;
+  const chk = $("#editar_avaliadas");
+  if (chk) chk.checked = false;
+}
+
 /** (Re)renderiza toda a Tela 3 — chamado ao entrar na tela. */
 export function renderizarTelaRiscos() {
   construirSeletorSetores();
@@ -717,10 +726,15 @@ export function inicializarTelaRiscos() {
   });
 
   // Alterna a possibilidade de reabrir funções já avaliadas para correção,
-  // listando-as imediatamente abaixo do seletor.
+  // listando-as imediatamente abaixo do seletor. Ao DESMARCAR, volta à
+  // visualização inicial (nenhuma função selecionada, conteúdo oculto).
   $("#editar_avaliadas")?.addEventListener("change", (ev) => {
     editarAvaliadas = ev.target.checked;
+    if (!editarAvaliadas) funcaoAtivaId = null;
     construirSeletorFuncoes();
+    atualizarVisibilidade();
+    renderizarRiscos();
+    renderizarEpis();
     renderizarAvaliadas();
   });
 
