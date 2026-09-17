@@ -110,6 +110,56 @@ function funcaoAvaliada(f) {
   return (f.avaliacoes_risco?.length || 0) > 0 || (f.verificacoes_epi_epc?.length || 0) > 0;
 }
 
+/** Seleciona uma função e abre seu conteúdo para edição. */
+function abrirFuncao(funcaoId) {
+  funcaoAtivaId = funcaoId;
+  const sel = $("#funcao_ativa");
+  if (sel) sel.value = funcaoId;
+  construirSeletorFuncoes();
+  atualizarVisibilidade();
+  renderizarRiscos();
+  renderizarEpis();
+  renderizarAvaliadas();
+  $("#riscos-conteudo")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/**
+ * Lista, abaixo do seletor, as funções já avaliadas do setor — para edição.
+ * Só aparece com o modo "Mostrar funções já avaliadas" ligado.
+ */
+function renderizarAvaliadas() {
+  const lista = $("#lista-avaliadas");
+  if (!lista) return;
+  const setor = obterSetor(setorAtivoId);
+  const avaliadas = (setor?.funcoes || []).filter(funcaoAvaliada);
+  lista.innerHTML = "";
+
+  if (!editarAvaliadas || avaliadas.length === 0) {
+    lista.hidden = true;
+    return;
+  }
+  lista.hidden = false;
+
+  avaliadas.forEach((f) => {
+    const li = document.createElement("li");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "lista-avaliadas__item";
+    if (f.id === funcaoAtivaId) btn.classList.add("lista-avaliadas__item--ativa");
+    const base = f.quantidade != null ? `${f.nome} (${f.quantidade})` : f.nome;
+    const nR = f.avaliacoes_risco?.length || 0;
+    const nE = f.verificacoes_epi_epc?.length || 0;
+    const nome = document.createElement("span");
+    nome.textContent = `✎ ${base}`;
+    const meta = document.createElement("small");
+    meta.textContent = `${nR} risco(s) · ${nE} EPI/EPC`;
+    btn.append(nome, meta);
+    btn.addEventListener("click", () => abrirFuncao(f.id));
+    li.appendChild(btn);
+    lista.appendChild(li);
+  });
+}
+
 /* ---------- Riscos ---------- */
 
 /** Cria o painel de detalhe (nível/observação/quantificação/fotos) de um risco presente. */
@@ -643,6 +693,7 @@ export function renderizarTelaRiscos() {
   atualizarVisibilidade();
   renderizarRiscos();
   renderizarEpis();
+  renderizarAvaliadas();
 }
 
 /** Inicializa listeners persistentes da Tela 3. */
@@ -654,6 +705,7 @@ export function inicializarTelaRiscos() {
     atualizarVisibilidade();
     renderizarRiscos();
     renderizarEpis();
+    renderizarAvaliadas();
   });
   $("#funcao_ativa")?.addEventListener("change", (ev) => {
     funcaoAtivaId = ev.target.value || null;
@@ -661,12 +713,15 @@ export function inicializarTelaRiscos() {
     atualizarVisibilidade();
     renderizarRiscos();
     renderizarEpis();
+    renderizarAvaliadas();
   });
 
-  // Alterna a possibilidade de reabrir funções já avaliadas para correção.
+  // Alterna a possibilidade de reabrir funções já avaliadas para correção,
+  // listando-as imediatamente abaixo do seletor.
   $("#editar_avaliadas")?.addEventListener("change", (ev) => {
     editarAvaliadas = ev.target.checked;
     construirSeletorFuncoes();
+    renderizarAvaliadas();
   });
 
   // "Incluir outra função / setor": volta ao topo (seletores) para avaliar a próxima.

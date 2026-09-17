@@ -902,3 +902,23 @@ input.invalido, select.invalido, textarea.invalido {
 .ghe-sug-consulta__lista { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
 .ghe-sug-consulta__lista li { font-size: .88rem; }
 .ghe-sug-consulta__vazio { list-style: none; margin-left: -18px; color: var(--cinza-medio, #6B7280); font-style: italic; }
+
+/* Lista de funções já avaliadas (Tela 3 — modo editar) */
+.lista-avaliadas { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+.lista-avaliadas__item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--card, #fff);
+  border: 1px solid var(--linha, #DDE3EC);
+  border-left: 4px solid var(--teal, #1BA89D);
+  border-radius: 10px;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.lista-avaliadas__item small { color: var(--cinza-medio, #6B7280); white-space: nowrap; }
+.lista-avaliadas__item--ativa { background: var(--realce-bg, #E8F6F4); }
